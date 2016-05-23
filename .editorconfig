@@ -10,6 +10,9 @@ trim_trailing_whitespace = true
 end_of_line = lf
 charset = utf-8
 
+[*.js]
+indent_size = 2
+
 # Use 2 spaces for the HTML files
 [*.html]
 indent_size = 2
