@@ -1,0 +1,34 @@
+.navbar-static-top {
+  z-index: 1000;
+  border-width: 0 0 1px;
+
+  @media (min-width: @screen-sm-min) {
+    border-radius: 0;
+  }
+}
+
+.navbar-petsitter {
+  position: relative;
+  z-index: 3;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: #fff;
+  background-clip: padding-box;
+  border-bottom: 1px solid rgba(0,0,0,0.075);
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.home .navbar-petsitter,
+.hav-jumbotron .navbar-petsitter {
+  margin-bottom: -1px;
+}
+
+.navbar-petsitter .navbar-nav > li > a {
+  color: @gray-light;
+
+  &:hover,
+  &:focus {
+    background-color: #fff;
+    color: @link-hover-color;
+  }
+}

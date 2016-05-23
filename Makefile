@@ -6,9 +6,10 @@ run:
 	php -S 0.0.0.0:8080 -t public/ public/index.php
 
 compile-static:
-	rm -r $(STATICPATH)
-	broccoli build $(STATICPATH)
-
+	broccoli build dist
+	mv dist/* $(STATICPATH)
+	rm -r dist
+	
 cs-fix:
 	vendor/bin/phpcbf
 

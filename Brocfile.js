@@ -2,7 +2,7 @@ var pickFiles   = require('broccoli-funnel');
 var compileLess = require('broccoli-less-single');
 var mergeTrees  = require('broccoli-merge-trees');
 
-var app = pickFiles('static', {
+var app = pickFiles('resources/static', {
   srcDir:  '/',
   destDir: '/'
 });
