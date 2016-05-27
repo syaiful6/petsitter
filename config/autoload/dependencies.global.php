@@ -13,6 +13,7 @@ return [
         // class name.
         'invokables' => [
             // Fully\Qualified\InterfaceName::class => Fully\Qualified\ClassName::class,
+            Pawon\Http\ResponseFactoryInterface::class => Pawon\Http\ResponseFactory::class,
             Helper\ServerUrlHelper::class => Helper\ServerUrlHelper::class,
         ],
         // Use 'factories' for services provided by callbacks/factory classes.
@@ -20,6 +21,8 @@ return [
             Application::class => AppFactory::class,
             Helper\UrlHelper::class => Helper\UrlHelperFactory::class,
             Pawon\Session\Store::class => Pawon\Session\StoreFactory::class,
+            'Pawon\Core\WhoopsPageHandler' => 'Pawon\Core\WhoopsPageHandlerFactory',
+            'Pawon\Core\Whoops' => 'Pawon\Core\WhoopsFactory',
             'Pawon\Cookie\QueueingCookieFactory' => 'Pawon\Cookie\CookieJarFactory',
             'Pawon\Translation\LoaderInterface' => 'Pawon\Translation\TranslatorFactory',
             'Pawon\Cache\Backends\BaseCache' => 'Pawon\Cache\CacheFactory',

@@ -7,9 +7,10 @@ run:
 
 compile-static:
 	broccoli build dist
-	mv dist/* $(STATICPATH)
+	rsync -a dist/* $(STATICPATH)
 	rm -r dist
-	
+	rm -r tmp
+
 cs-fix:
 	vendor/bin/phpcbf
 

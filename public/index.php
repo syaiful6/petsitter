@@ -16,9 +16,9 @@ require 'vendor/autoload.php';
 /** @var \Interop\Container\ContainerInterface $container */
 $container = require 'config/container.php';
 
-/** @var \App\Foundation\Application $app */
+/** @var \Pawon\Core\Application $app */
 $app = $container->get(Application::class);
 
 $server = new SimpleHttpHandler();
 
-$server->serve([$app, 'boot']);
+$server->serve($app);

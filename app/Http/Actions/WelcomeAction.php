@@ -2,12 +2,12 @@
 
 namespace App\Http\Actions;
 
-use Zend\Diactoros\Stream;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
+use Pawon\Http\Middleware\FrameInterface;
+use Pawon\Http\Middleware\MiddlewareInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use Zend\Expressive\Template\TemplateRendererInterface;
 
-class WelcomeAction
+class WelcomeAction implements MiddlewareInterface
 {
     /**
      * @var Zend\Expressive\Template\TemplateRendererInterface
@@ -25,16 +25,12 @@ class WelcomeAction
     /**
      *
      */
-    public function __invoke(
-        ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next = null
-    ) {
+    public function handle(Request $request, FrameInterface $frame)
+    {
         $html = $this->templateRenderer->render('app::welcome');
-        $stream = new Stream('php://memory', 'w+b');
-        $stream->write($html);
-        return $response
-            ->withBody($stream)
-            ->withHeader('Content-Type', 'text/html');
+
+        return $frame->getResponseFactory()->make($html, 200, [
+            'Content-Type'  => 'text/html; charset=utf-8'
+        ]);
     }
 }
