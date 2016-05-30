@@ -16,6 +16,7 @@
   <![endif]-->
 </head>
 <body class="{% block bodyclass %}{% endblock %}">
+  {% block navigation %}
   <nav class="navbar navbar-static-top navbar-petsitter">
     <div class="container">
       <div class="navbar-header">
@@ -52,24 +53,27 @@
       </div>
     </div>
   </nav>
+  {% endblock %}
   {% block before_content %}
+  {% if messages.count() > 0 %}
   <div class="container">
     <div class="row">
       <div class="col-md-10 col-md-offset-1">
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}" role="alert">
-              {{ message }}
-            </div>
-          {% endfor %}
-        {% endif %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>
+  {% endif %}
   {% endblock %}
   {% block content %}{% endblock %}
   {% block after_content %}{% endblock %}
+  {% block jscript %}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  {% endblock %}
 </body>
 </html>

@@ -1,0 +1,13 @@
+{
+  "name": "purescript",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-pux": "~1.0.0",
+    "purescript-random": "~0.2.3"
+  }
+}
