@@ -42,5 +42,11 @@ return [
             'middleware' => 'App\Http\Actions\Auth\ResetsPasswords',
             'allowed_methods' => ['GET', 'POST']
         ],
+        [
+            'name' => 'reset_confirm',
+            'path' => '/password/confirm/{token}/{email}',
+            'middleware' => 'App\Http\Actions\Auth\ResetPasswordConfirm',
+            'allowed_methods' => ['GET', 'POST']
+        ],
     ],
 ];
