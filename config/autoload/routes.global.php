@@ -54,5 +54,17 @@ return [
             'middleware' => 'App\Http\Actions\Auth\ResetPasswordConfirm',
             'allowed_methods' => ['GET', 'POST']
         ],
+        [
+            'name' => 'api.v01.states',
+            'path' => '/api/v0.1/states',
+            'middleware' => 'App\Http\Actions\Api\StatesApi',
+            'allowed_methods' => ['GET']
+        ],
+        [
+            'name' => 'api.v01.cities',
+            'path' => '/api/v0.1/cities/{state}',
+            'middleware' => 'App\Http\Actions\Api\CitiesApi',
+            'allowed_methods' => ['GET']
+        ]
     ],
 ];
