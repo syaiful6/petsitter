@@ -19,6 +19,12 @@ return [
             'allowed_methods' => ['GET'],
         ],
         [
+            'name'  => 'dashboard',
+            'path'  => '/dashboard',
+            'middleware' => 'App\Http\Actions\DashboardAction',
+            'allowed_methods' => ['GET'],
+        ],
+        [
             'name' => 'login',
             'path' => '/login',
             'middleware' => 'App\Http\Actions\Auth\LoginAction',
