@@ -15,7 +15,7 @@ class StatesApi implements MiddlewareInterface
      */
     public function handle(Request $request, FrameInterface $frame)
     {
-        $file = 'resources/static/js/states.json';
+        $file = 'resources/static/states.json';
         $states = json_decode(file_get_contents($file), true);
         $pairMap = map(function ($elem) {
             return [

@@ -15,7 +15,7 @@ class CitiesApi implements MiddlewareInterface
      */
     public function handle(Request $request, FrameInterface $frame)
     {
-        $file = 'resources/static/js/cities.json';
+        $file = 'resources/static/cities.json';
         $cities = json_decode(file_get_contents($file), true);
         $state = strtoupper($request->getAttribute('state'));
         $citiesOnState = isset($cities[$state]) ? $cities[$state] : [];
