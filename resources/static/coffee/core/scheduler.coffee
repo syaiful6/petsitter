@@ -127,7 +127,7 @@ workQueue = []
 
 enqueue = (process) ->
   workQueue.push process
-  if not working
+  unless working
     setTimeout work, 0
     working = true
 
@@ -136,7 +136,7 @@ work = ->
   process = null
   while numSteps < MAX_STEPS and (process = workQueue.shift())
     numSteps = step(numSteps, process)
-  if not process
+  unless process
     working = false
     return
   setTimeout work, 0

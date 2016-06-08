@@ -1,3 +1,5 @@
+h = require 'virtual-dom/h'
+
 isValidString = (param) ->
   typeof param == 'string' and param.length > 0
 
@@ -34,7 +36,7 @@ TAG_NAMES = [
   'th', 'thead', 'title', 'tr', 'u', 'ul', 'video'
 ]
 
-module.exports = (h) ->
+module.exports = do (h) ->
   createTag = node h
   exported =
     TAG_NAMES: TAG_NAMES

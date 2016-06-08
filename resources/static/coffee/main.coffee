@@ -1,15 +1,12 @@
 {program} = require './dom/program'
-{batch, addPublicModule} = require './core/platform'
-{fromArray, Nil} = require './core/list'
+{startApp} = require './core/platform'
+{none} = require './core/cmd/cmd'
 {Tuple2} = require './utils/common'
 {onClick} = require './dom/events'
-h = require 'virtual-dom/h'
-m = require './dom/helper'
-
-{div, button, span} = m(h)
+{div, button, span} = require './dom/helper'
 
 init = ->
-  Tuple2(model, batch(Nil))
+  Tuple2(model, none)
 
 model = 0
 
@@ -22,9 +19,9 @@ Decrement = ->
 update = (msg) -> (model) ->
   ctor = msg.ctor
   if ctor == 'Increment'
-    Tuple2(model + 1, batch(Nil))
+    Tuple2(model + 1, none)
   else if ctor == 'Decrement'
-    Tuple2(model - 1, batch(Nil))
+    Tuple2(model - 1, none)
 
 test = (ev) ->
   console.log(ev)
@@ -38,18 +35,16 @@ view = (model) ->
     ]
   )
 
-main = {
-  main: program {
-    init:init,
-    model: model,
-    view: view,
-    update: update,
-    subscriptions: -> batch(Nil)
-  }
-}
+subscriptions = ->
+  none
 
-app = {}
-app['main'] = app['main'] or {}
-addPublicModule(app['main'], 'main', main)
+main = program
+  init:init
+  model: model
+  view: view
+  update: update
+  subscriptions: subscriptions
+
+app = startApp(main)
 node = document.getElementById('app')
 app = app.main.embed(node)

@@ -15,6 +15,12 @@
 
 schedulerSend = send
 
+startApp = (main) ->
+  app = {}
+  app['main'] = main
+  addPublicModule(app['main'], 'main', app)
+  app
+
 addPublicModule = (object, name, main) ->
   init = if main then makeEmbed(name, main) else mainIsUndefined(name)
 
@@ -322,6 +328,7 @@ module.exports =
   outgoingPort: outgoingPort
   incomingPort: incomingPort
   addPublicModule: addPublicModule
-  leaf: leaf,
-  batch: batch,
+  leaf: leaf
+  batch: batch
   map: curry2(map)
+  startApp: startApp
