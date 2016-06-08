@@ -35,3 +35,11 @@ foldr = (f, b, xs) ->
   for item in arr
     acc = invoke2(f, item, acc)
   acc
+
+module.exports =
+  Nil: Nil
+  Cons: Cons
+  fromArray: fromArray
+  toArray: toArray
+  range: range
+  foldr: foldr

@@ -8,17 +8,16 @@ isSelector = (param) ->
   isValidString(param) and (startsWith('.', param) or startsWith('#', param))
 
 element = (h) -> (tagName, attrs, children) ->
-  children = children[0] if Array.isArray(children[0])
   props = attrs.reduce (obj, attr) ->
     key = attr[0]
     val = attr[1]
     obj[key] = val
     obj
   , {}
-  h.apply(h, [tagName, props].concat(children))
+  h(tagName, props, children)
 
 node = (h) -> (tagName) -> (first, rest...) ->
-  elem = elements(h)
+  elem = element(h)
   if isSelector(first) then elem(tagName + first, rest...) else elem(tagName, first, rest...)
 
 TAG_NAMES = [

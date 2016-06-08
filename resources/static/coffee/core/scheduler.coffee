@@ -4,7 +4,7 @@
 MAX_STEPS = 10000
 
 succeed = (val) ->
-  ctor: '_Task_success'
+  ctor: '_Task_succeed'
   value: val
 
 fail = (error) ->
@@ -144,6 +144,7 @@ work = ->
 module.exports =
   succeed: succeed
   fail: fail
+  nativeBinding: nativeBinding
   andThen: curry2(andThen)
   onError: curry2(onError)
   receive: receive
