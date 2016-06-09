@@ -1,29 +1,26 @@
+{eventHook} = require './vdom'
+
 onClick = (msg) ->
-  ['onclick', (ev) ->
-    handler = window.$eventNode
-    handler(msg())
-  ]
+  event("click")(msg)(false)
+
+onDoubleClick = (msg) ->
+  event("dblclick")(msg)(false)
 
 onInput = (msg) ->
-  ['oninput', (ev) ->
-    handler = window.$eventNode
-    handler(msg(ev.target.value))
-  ]
+  handler = (ev) ->
+    msg(ev.target.value)
+  event("input")(handler)(false)
 
 onChange = (msg) ->
-  ['onchange', (ev) ->
-    handler = window.$eventNode
-    handler(msg(ev.target.value))
-  ]
+  handler = (ev) ->
+    msg(ev.target.value)
+  event("change")(handler)(false)
 
-onKeyUp = (msg) ->
-  ['onkeyup', (ev) ->
-    handler = window.$eventNode
-    handler(msg(ev.target.value))
-  ]
+event = (type) -> (listener) -> (options) ->
+  ["ev-#{type}", eventHook(listener, options)]
 
 module.exports =
   onClick: onClick
   onChange: onChange
   onInput: onInput
-  onKeyUp: onKeyUp
+  event: event

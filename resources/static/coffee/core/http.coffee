@@ -244,3 +244,20 @@ post = (decoder) -> (url) -> (body) ->
     body: body
   res = send(defaultSettings)(request)
   fromJson(decoder)(res)
+
+module.exports =
+  get: get
+  post: post
+  getRaw: getRaw
+  fromJson: fromJson
+  send: send
+  multipart: multipart
+  BodyString: BodyString
+  BodyBlob: BodyBlob
+  BodyFormData: BodyFormData
+  FileData: FileData
+  FormData: FormData
+  StringData: StringData
+  Settings: Settings
+  Request: Request
+  Response: Response

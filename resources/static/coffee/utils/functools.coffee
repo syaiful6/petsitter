@@ -36,8 +36,22 @@ curry6 = (fun) ->
 curry7 = (fun) ->
   wrapper = (a) -> (b) -> (c) -> (d) -> (e) -> (f) -> (g) ->
     fun a, b, c, d, e, f, g
-  wrapper.func - fun
+  wrapper.func = fun
   wrapper.arity = 7
+  wrapper
+
+curry8 = (fun) ->
+  wrapper = (a) -> (b) -> (c) -> (d) -> (e) -> (f) -> (g) -> (h) ->
+    fun a, b, c, d, e, f, g, h
+  wrapper.func = fun
+  wrapper.arity = 8
+  wrapper
+
+curry9 = (fun) ->
+  wrapper = (a) -> (b) -> (c) -> (d) -> (e) -> (f) -> (g) -> (h) -> (i) ->
+    fun a, b, c, d, e, f, g, h, i
+  wrapper.func = fun
+  wrapper = 9
   wrapper
 
 invoke2 = (fun, a, b) ->
@@ -58,6 +72,12 @@ invoke6 = (fun, a, b, c, d, e, f) ->
 invoke7 = (fun, a, b, c, d, e, f, g) ->
   if fun.arity == 7 then fun.func(a, b, c, d, e, f, g) else fun(a)(b)(c)(d)(e)(f)(g)
 
+invoke8 = (fun, a, b, c, d, e, f, g, h) ->
+  if fun.arity == 8 then fun.func(a, b, c, d, e, f, g, h) else fun(a)(b)(c)(d)(e)(f)(g)(h)
+
+invoke9 = (fun, a, b, c, d, e, f, g, h, i) ->
+  if fun.arity == 9 then fun.func(a, b, c, d, e, f, g, h) else fun(a)(b)(c)(d)(e)(f)(g)(h)(i)
+
 module.exports =
   curry2: curry2
   curry3: curry3
@@ -65,9 +85,13 @@ module.exports =
   curry5: curry5
   curry6: curry6
   curry7: curry7
+  curry8: curry8
+  curry9: curry9
   invoke2: invoke2
   invoke3: invoke3
   invoke4: invoke4
   invoke5: invoke5
   invoke6: invoke6
   invoke7: invoke7
+  invoke8: invoke8
+  invoke9: invoke9

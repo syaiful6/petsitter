@@ -1,6 +1,6 @@
 {Nil, Cons} = require './list'
 {Tuple0, Tuple2} = require '../utils/common'
-{program} = require '../dom/program'
+{programWithFlags} = require '../dom/vdom'
 {curry2, curry3, invoke2, invoke3, invoke4} = require '../utils/functools'
 
 # hmm
@@ -56,7 +56,7 @@ mainToProgram = (moduleName, wrappedMain) ->
   if typeof main == 'undefined'
     emptyBag = batch(Nil)
     noChange = Tuple2 Tuple0, emptyBag
-    return program(
+    return programWithFlags(
         init: -> noChange
         view: -> main
         update: curry2(-> noChange)
@@ -64,7 +64,7 @@ mainToProgram = (moduleName, wrappedMain) ->
       )
   flags = wrappedMain.flags
   init = if flags then initWithFlags(moduleName, main.init, flags) else initWithoutFlags(moduleName, main.init)
-  program(
+  programWithFlags(
       init: init
       view: main.view
       update: main.update

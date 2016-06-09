@@ -16,7 +16,7 @@ chr = (x) ->
 
 update = (oldRecord, updatedFields) ->
   newRecord = {}
-  for key of oldRecord
+  for own key of oldRecord
     value = if key of updatedFields then updatedFields[key] else oldRecord[key]
     newRecord[key] = value
   newRecord

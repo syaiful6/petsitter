@@ -4,8 +4,23 @@ createElement = require 'virtual-dom/create-element'
 
 raf = if typeof requestAnimationFrame != 'undefined' then requestAnimationFrame else (cb) -> setTimeout(cb, 1000 / 60)
 
+# the event hook to dispatch event to our app
+# see in events.coffee
+eventHook = (listener, options) ->
+  handler = (ev) ->
+    eventHook.evnode(listener(ev))
+  hook = (node, propertyName) ->
+    type = propertyName.substr(3)
+    node.addEventListener(type, handler, options)
+  unhook = (node, propertyName) ->
+    type = propertyName.substr(3)
+    node.removeEventListener(type, handler, options)
+  Object.create
+    hook: hook
+    unhook: unhook
+
 renderer = (root, evnode, tree) ->
-  window.$eventNode = evnode
+  eventHook.evnode = evnode
   domNode = createElement tree
   root.appendChild domNode
   state = 'NO_REQUEST'
@@ -31,7 +46,7 @@ renderer = (root, evnode, tree) ->
 
   update: register
 
-program = (details) ->
+programWithFlags = (details) ->
   init: details.init
   view: details.view
   subscriptions: details.subscriptions
@@ -39,5 +54,6 @@ program = (details) ->
   renderer: renderer
 
 module.exports =
-  program: program
+  programWithFlags: programWithFlags
   renderer: renderer
+  eventHook: eventHook
