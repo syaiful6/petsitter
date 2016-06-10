@@ -76,7 +76,7 @@ invoke8 = (fun, a, b, c, d, e, f, g, h) ->
   if fun.arity == 8 then fun.func(a, b, c, d, e, f, g, h) else fun(a)(b)(c)(d)(e)(f)(g)(h)
 
 invoke9 = (fun, a, b, c, d, e, f, g, h, i) ->
-  if fun.arity == 9 then fun.func(a, b, c, d, e, f, g, h) else fun(a)(b)(c)(d)(e)(f)(g)(h)(i)
+  if fun.arity == 9 then fun.func(a, b, c, d, e, f, g, h, i) else fun(a)(b)(c)(d)(e)(f)(g)(h)(i)
 
 module.exports =
   curry2: curry2
