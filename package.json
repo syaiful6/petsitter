@@ -16,7 +16,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prebrowserify": "mkdirp dist",
-    "browserify": "browserify --extension=\".coffee\" resources/static/coffee/main.coffee -t coffeeify --outfile public/assets/main.js"
+    "prebrowserify": "mkdirp public/assets/js",
+    "browserify": "browserify --extension=\".coffee\" resources/static/coffee/main.coffee -t coffeeify --outfile public/assets/js/main.js"
   }
 }
