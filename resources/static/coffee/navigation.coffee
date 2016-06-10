@@ -7,6 +7,7 @@ platform = require './core/platform'
 {invoke3, invoke2} = require './utils/functools'
 {Tuple0} = require './utils/common'
 {onWindow} = require './dom/window'
+app = require './dom/app'
 
 go = (n) ->
   scheduler.nativeBinding (callback) ->
@@ -79,7 +80,7 @@ State = (a) -> (b) ->
   subs: a
   process: b
 
-init = platform.succeed invoke2(State, fromArray([]), Nothing)
+init = scheduler.succeed invoke2(State, fromArray([]), Nothing)
 
 onEffects = (router) -> (cmds) -> (subs) -> (val) ->
   proc = val.process
@@ -141,7 +142,7 @@ cmdMap = (__, myCmd) ->
     else Modify myCmd._0
 
 Monitor = (a) ->
-  ctor 'Monitor'
+  ctor: 'Monitor'
   _0: a
 
 programWithFlags = (parser) -> (stuff) ->
@@ -149,3 +150,54 @@ programWithFlags = (parser) -> (stuff) ->
   location = getLocation()
   init = (flags) ->
     invoke2 updateHelp, UserMsg, invoke2(stuff.init, flags, data(location))
+  view = (model) ->
+    invoke2 app.map, UserMsg, stuff.view(model)
+  subs = (model) ->
+    platform.batch fromArray([
+      subscription(Monitor(Change)),
+      invoke2 platform.map, UserMsg, stuff.subscriptions(model)
+    ])
+  intent = (msg) -> (model) ->
+    invoke2 updateHelp, UserMsg, do ->
+      m = msg
+      if m.ctor == 'Change'
+        invoke2 stuff.urlUpdate, data(m._0), model
+      else
+        invoke2 stuff.update, m._0, model
+  app.programWithFlags
+    init: init
+    view: view
+    update: intent
+    subscriptions: subs
+
+program = (parser) -> (stuff) ->
+  invoke2 programWithFlags, parser, do (stuff) ->
+    newField =
+      init: (__) -> stuff.init
+    newRecord = {}
+    for own key of stuff
+      value = if key of newField then newField[key] else stuff[key]
+      newRecord[key] = value
+    newRecord
+
+subMap = (func) -> (val) ->
+  Monitor (el) -> func(val._0(el))
+
+unless 'Navigation' of platform.effectManagers
+  platform.effectManagers['Navigation'] =
+    pkg: 'app/navigation'
+    init: init
+    onEffects: onEffects
+    onSelfMsg: onSelfMsg
+    tag: 'fx'
+    cmdMap: cmdMap
+    subMap: subMap
+
+module.exports =
+  program: program
+  programWithFlags: programWithFlags
+  modifyUrl: modifyUrl
+  newUrl: newUrl
+  back: back
+  forward: forward
+  makeParser: makeParser

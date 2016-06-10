@@ -7,7 +7,7 @@ toMaybe = (result) ->
     Nothing
 
 withDefault = (def) -> (result) ->
-  result._0 if result.ctor == 'Ok' else def
+  if result.ctor == 'Ok' then result._0 else def
 
 Err = (a) ->
   ctor: 'Err'
@@ -28,13 +28,13 @@ andThen = (result) -> (callback) ->
     Err(result._0)
 
 map = (fun) -> (result) ->
-  Ok(fun(result._0)) if result.ctor == 'Ok' else Err(result._0)
+  if result.ctor == 'Ok' then Ok(fun(result._0)) else Err(result._0)
 
 formatError = (fun) -> (result) ->
-  Ok(result._0) if result.ctor == 'Ok' else Err(fun(result._0))
+  if result.ctor == 'Ok' then Ok(result._0) else Err(fun(result._0))
 
 fromMaybe = (err) -> (maybe) ->
-  Ok(maybe._0) if maybe.ctor == 'Just' else Err(err)
+  if maybe.ctor == 'Just' then Ok(maybe._0) else Err(err)
 
 module.exports =
   fromMaybe: fromMaybe

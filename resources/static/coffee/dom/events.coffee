@@ -1,26 +1,36 @@
-{eventHook} = require './vdom'
+vdom = require './vdom'
+{ok} = require '../core/result'
+functools = require '../utils/functools'
+
+defaultOptions =
+  stopPropagation: off
+  preventDefault: off
+
+event = (eventName, decoder) ->
+  vdom.event(eventName)(defaultOptions)(decoder)
 
 onClick = (msg) ->
-  event("click")(msg)(false)
+  decoder = (e) ->
+    ok(msg())
+  event 'click', decoder
 
 onDoubleClick = (msg) ->
-  event("dblclick")(msg)(false)
+  decoder = (e) ->
+    ok(msg())
+  event 'dbclick', decoder
 
 onInput = (msg) ->
-  handler = (ev) ->
-    msg(ev.target.value)
-  event("input")(handler)(false)
+  decoder = (ev) ->
+    ok(msg(ev.target.value))
+  event 'input', decoder
 
 onChange = (msg) ->
-  handler = (ev) ->
-    msg(ev.target.value)
-  event("change")(handler)(false)
-
-event = (type) -> (listener) -> (options) ->
-  ["ev-#{type}", eventHook(listener, options)]
+  decoder = (ev) ->
+    ok(msg(ev.target.value))
+  event 'change', decoder
 
 module.exports =
   onClick: onClick
   onChange: onChange
   onInput: onInput
-  event: event
+  event: functools.curry2 event

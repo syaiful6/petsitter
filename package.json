@@ -5,9 +5,6 @@
   "description": "static compiler",
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "virtual-dom": "2.1.1"
-  },
   "devDependencies": {
     "browserify": "11.0.1",
     "coffeeify": "^2.0.1",

@@ -1,6 +1,6 @@
-scheduler require './scheduler'
-platform require './platform'
-maybe require './maybe'
+scheduler = require './scheduler'
+platform = require './platform'
+maybe = require './maybe'
 list = require './list'
 
 onError = scheduler.onError

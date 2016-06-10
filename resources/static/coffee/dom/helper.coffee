@@ -1,26 +1,8 @@
-h = require 'virtual-dom/h'
+# helper for creating vdom tree
+vdom = require './vdom'
 
-isValidString = (param) ->
-  typeof param == 'string' and param.length > 0
-
-startsWith = (start, string) ->
-  string[0] == start
-
-isSelector = (param) ->
-  isValidString(param) and (startsWith('.', param) or startsWith('#', param))
-
-element = (h) -> (tagName, attrs, children) ->
-  props = attrs.reduce (obj, attr) ->
-    key = attr[0]
-    val = attr[1]
-    obj[key] = val
-    obj
-  , {}
-  h(tagName, props, children)
-
-node = (h) -> (tagName) -> (first, rest...) ->
-  elem = element(h)
-  if isSelector(first) then elem(tagName + first, rest...) else elem(tagName, first, rest...)
+wrapper = (nodeTag) -> (factList, kidList) ->
+  nodeTag(factList)(kidList)
 
 TAG_NAMES = [
   'a', 'abbr', 'address', 'area', 'article', 'aside', 'audio', 'b', 'base',
@@ -36,14 +18,11 @@ TAG_NAMES = [
   'th', 'thead', 'title', 'tr', 'u', 'ul', 'video'
 ]
 
-module.exports = do (h) ->
-  createTag = node h
+module.exports = do (vdom) ->
   exported =
     TAG_NAMES: TAG_NAMES
-    isSelector: isSelector
-    createTag: createTag
+    text: vdom.text
 
   for tag in TAG_NAMES
-    exported[tag] = createTag tag
-
+    exported[tag] = wrapper vdom.node(tag)
   exported

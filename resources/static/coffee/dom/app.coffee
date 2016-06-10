@@ -1,6 +1,6 @@
 {Tuple2, update} = require '../utils/common'
 {none} = require '../core/cmd/cmd'
-{programWithFlags} = require './vdom'
+{programWithFlags, map} = require './vdom'
 
 beginnerProgram = (details) ->
   programWithFlags
@@ -16,5 +16,6 @@ programWithFlags = programWithFlags
 
 module.exports =
   program: program
+  map: map
   programWithFlags: programWithFlags
   beginnerProgram: beginnerProgram
