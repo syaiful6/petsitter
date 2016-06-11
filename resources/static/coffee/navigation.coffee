@@ -28,6 +28,20 @@ replaceState = (url) ->
 getLocation = ->
   document.location
 
+  {
+    href: location.href
+    host: location.host
+    hostname: location.hostname
+    protocol: location.protocol
+    origin: location.origin
+    port: location.port
+    pathname: location.pathname
+    search: location.search
+    hash: location.hash
+    username: location.username
+    password: location.password
+  }
+
 andThenHelp = (task1) -> (task2) ->
   wrap = (_v) ->
     task2
@@ -36,29 +50,29 @@ andThenHelp = (task1) -> (task2) ->
 spawnPopState = (router) ->
   toTask = (_e) ->
     invoke2(platform.sendToSelf, router, getLocation())
-  spawn invoke3(onWindow, 'popstate', ok, toTask)
+  scheduler.spawn invoke3(onWindow, 'popstate', ok, toTask)
 
 notify = (router) -> (subs) -> (location) ->
   callback = (val) ->
     invoke2(platform.sendToApp, router, val._0(location))
-  if Array.isArray(sub)
+  if Array.isArray(subs)
     subs = fromArray(subs)
   invoke2(andThenHelp, sequence(invoke2(map, callback, subs)), scheduler.succeed(Tuple0))
 
 onSelfMsg = (router) -> (location) -> (state) ->
   job = invoke3(notify, router, state.subs, location)
-  invoke2(andThenHelp, job, scheduler.succeed(location))
+  invoke2(andThenHelp, job, scheduler.succeed(state))
 
 cmdHelp = (router) -> (subs) -> (cmd) ->
   switch cmd.ctor
     when 'Jump' then go cmd._0
-    when 'New' then invoke2 pushState(cmd._0), invoke2(notify, router, subs)
-    else invoke2 replaceState(cmd._0), invoke2(notify, router, subs)
+    when 'New' then invoke2 andThen, pushState(cmd._0), invoke2(notify, router, subs)
+    else invoke2 andThen, replaceState(cmd._0), invoke2(notify, router, subs)
 
 updateHelp = (func) -> (val) ->
   ctor: '_Tuple2'
   _0: val._0
-  _1: invoke2 platform.map, val._1
+  _1: invoke2 platform.map, func, val._1
 
 subscription = platform.leaf("Navigation")
 command = platform.leaf("Navigation")
@@ -86,14 +100,18 @@ onEffects = (router) -> (cmds) -> (subs) -> (val) ->
   proc = val.process
   stepState = do ->
     step = ctor: '_Tuple2', _0: subs, _1: proc
-    if step._0.ctor == '[]' and step._1.ctor == 'Just'
-      invoke2 andThenHelp, scheduler.kill(step._1._0), scheduler.succeed(State(subs)(Nothing))
-    else if step._1.ctor == 'Nothing'
-      wrap = (pid) ->
-        scheduler.succeed State(subs)(Just(pid))
-      invoke2 andThenHelp, spawnPopState(router), wrap
+    if step._0.ctor == '[]'
+      if step._1.ctor == 'Just'
+        return invoke2 andThenHelp, scheduler.kill(step._1._0), scheduler.succeed(State(subs)(Nothing))
+      else
+        return scheduler.succeed State(subs)(proc)
     else
-      scheduler.succeed State(subs)(proc)
+      if step._1.ctor == 'Nothing'
+        wrap = (pid) ->
+          scheduler.succeed State(subs)(Just(pid))
+        return invoke2 andThen, spawnPopState(router), wrap
+      else
+        return scheduler.succeed State(subs)(proc)
   job = invoke2 map, invoke2(cmdHelp, router, subs), cmds
   invoke2 andThenHelp, sequence(job), stepState
 
@@ -135,7 +153,7 @@ back = (n) ->
 forward = (n) ->
   command Jump(n)
 
-cmdMap = (__, myCmd) ->
+cmdMap = (__) -> (myCmd) ->
   switch myCmd.ctor
     when 'Jump' then Jump myCmd._0
     when 'New' then NewUrl myCmd._0

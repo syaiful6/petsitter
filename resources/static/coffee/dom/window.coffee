@@ -13,6 +13,6 @@ internal = (node) -> (eventName, decoder, toTask) ->
     ->
       node.removeEventListener(eventName, performTask)
 
-module.export =
+module.exports =
   onWindow: curry3(internal(window))
   onDocument: curry3(internal(document))

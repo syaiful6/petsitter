@@ -57,7 +57,7 @@ send = (process, msg) ->
 kill = (process) ->
   nativeBinding (callback) ->
     root = process.root
-    root.cancel() if root.ctor == '_Task_nativeBinding' && root.cancel
+    root.cancel() if root.ctor == '_Task_nativeBinding' and root.cancel
     process.root = null
     callback(succeed(Tuple0))
 

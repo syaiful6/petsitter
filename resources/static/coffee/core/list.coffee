@@ -11,9 +11,9 @@ Cons = (hd, tl) ->
 
 fromArray = (arr) ->
   out = Nil
-  co = arr.slice().reverse()
-  for item in co
-    out = Cons(co, out)
+  i = arr.length
+  while i--
+    out = Cons(arr[i], out)
   out
 
 toArray = (xs) ->
@@ -31,10 +31,11 @@ range = (lo, hi) ->
   list
 
 foldr = (f, b, xs) ->
-  arr = toArray(xs).slice().reverse()
+  arr = toArray(xs)
   acc = b
-  for item in arr
-    acc = invoke2(f, item, acc)
+  i = arr.length
+  while i--
+    acc = invoke2(f, arr[i], acc)
   acc
 
 foldl = (func, acc, list) ->

@@ -74,16 +74,16 @@ sequence = (tasks) ->
   if Array.isArray(tasks)
     tasks = list.fromArray(tasks)
   if tasks.ctor == '[]'
-    succeed(fromArray([]))
+    succeed(list.fromArray([]))
   else
     wrapped = (x) -> (y) ->
-      list.Cons(x, y)
+      list.cons(x)(y)
     map2(wrapped)(tasks._0)(sequence(tasks._1))
 
 onEffects = (router) -> (commands) -> (state) ->
   callback = (_x) ->
     {ctor: '_Tuple0'}
-  map(callback)(sequence(list.map(spawnCmd(router)(commands))))
+  map(callback)(sequence(list.map(spawnCmd(router))(commands)))
 
 toMaybe = (task) ->
   wrapped = (_x) ->
@@ -91,6 +91,10 @@ toMaybe = (task) ->
   onError(map(maybe.Just)(task))(wrapped)
 
 command = platform.leaf('Task')
+
+onSelfMsg = (x) -> (y) -> (z) ->
+  succeed({ctor: '_Tuple0'})
+
 T = (x) ->
   ctor: 'T'
   _0: x
@@ -101,7 +105,16 @@ perform = (onFail) -> (onSuccess) -> (task) ->
   command(T(onError(map(onSuccess)(task))(wrapped)))
 
 cmdMap = (tagger) -> (task) ->
-  T(map(tagger)(task))
+  T(map(tagger)(task._0))
+
+unless 'Task' of platform.effectManagers
+  platform.effectManagers['Task'] =
+    pkg: 'app/task'
+    init: succeed({ctor: '_Tuple0'})
+    onEffects: onEffects
+    onSelfMsg: onSelfMsg
+    tag: 'cmd'
+    cmdMap: cmdMap
 
 module.exports =
   onError: onError

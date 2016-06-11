@@ -17,8 +17,8 @@ schedulerSend = send
 
 startApp = (main) ->
   app = {}
-  app['main'] = main
-  addPublicModule(app['main'], 'main', app)
+  app['main'] = {}
+  addPublicModule(app['main'], 'main', {main: main})
   app
 
 addPublicModule = (object, name, main) ->
@@ -120,7 +120,7 @@ effectManagers = {}
 
 setupEffects = (managers, callback) ->
   ports = null
-  for key of managers
+  for key of effectManagers
     manager = effectManagers[key]
     if managers.isForeign
       ports = ports or {}
@@ -141,7 +141,7 @@ makeManager = (info, callback) ->
   onSelfMsg = info.onSelfMsg
 
   onMessage = (msg, state) ->
-    invoke3(onSelfMsg, router, msg._0, state) if msg.ctor == 'self'
+    return invoke3(onSelfMsg, router, msg._0, state) if msg.ctor == 'self'
 
     fx = msg._0
     if tag == 'cmd'
@@ -172,8 +172,8 @@ spawnLoop = (init, onMessage) ->
       onMessage(msg, state)
     invoke2(andThen, handleMsg, mainLoop)
   # set the task
-  task = invoke2(andThen, init, mainLoop)
-  rawSpawn(task)
+  taskP = invoke2(andThen, init, mainLoop)
+  rawSpawn(taskP)
 
 # bags
 leaf = (home) -> (value) ->
@@ -203,6 +203,7 @@ dispatchEffects = (managers, cmdBag, subBag) ->
         cmds: Nil
         subs: Nil
     rawSend managers[home], { ctor: 'fx', _0: fx }
+  return
 
 gatherEffects = (isCmd, bag, effectsDict, taggers) ->
   type = bag.type
@@ -222,7 +223,7 @@ gatherEffects = (isCmd, bag, effectsDict, taggers) ->
       tagger: bag.tagger,
       rest: taggers
     })
-    return
+  return
 
 toEffect = (isCmd, home, taggers, value) ->
   applyTaggers = (x) ->
@@ -231,8 +232,8 @@ toEffect = (isCmd, home, taggers, value) ->
       x = temp.tagger(x)
       temp = temp.rest
     x
-  map = if isCmd then effectManagers[home].cmdMap else effectManagers[home].subMap
-  invoke2(map, applyTaggers, value)
+  eff = if isCmd then effectManagers[home].cmdMap else effectManagers[home].subMap
+  invoke2(eff, applyTaggers, value)
 
 insert = (isCmd, newEffect, effects) ->
   effects = effects or {
@@ -242,7 +243,7 @@ insert = (isCmd, newEffect, effects) ->
   if isCmd
     effects.cmds = Cons(newEffect, effects.cmds)
   else
-    effects.subs = Cons(newEffect, effects.cmds)
+    effects.subs = Cons(newEffect, effects.subs)
   effects
 
 checkPortName = (name) ->
@@ -318,6 +319,7 @@ setupIncomingPort = (name, callback) ->
     while temp.ctor != '[]'
       callback(temp._0(value))
       temp = temp._1
+    return
   {send: send}
 
 module.exports =

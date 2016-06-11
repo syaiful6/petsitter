@@ -242,8 +242,10 @@ makeEventHandler = (eventNode, info) ->
         if typeof tagger == 'function'
           message = tagger(message)
         else
-          rev = tagger.slice().reverse()
-          message = t(message) for t in rev
+          # rev = tagger.slice().reverse()
+          i = tagger.length
+          while i--
+            message = tagger[i](message)
         currentEventNode = currentEventNode.parent
   eventHandler.info = info
   eventHandler
@@ -311,7 +313,16 @@ diffHelp = (a, b, patches, index) ->
       aSubNode = a.node
       while aSubNode.type == 'tagger'
         nesting = true
-        if typeof b.tagger != 'object'
+        if typeof aTaggers != 'object'
+          aTaggers = [aTaggers, aSubNode.tagger]
+        else
+          aTaggers.push(aSubNode.tagger)
+        aSubNode = aSubNode.node
+
+      bSubNode = b.node
+      while bSubNode.type == 'tagger'
+        nesting = true
+        if typeof bTaggers != 'object'
           bTaggers = [bTaggers, bSubNode.tagger]
         else
           bTaggers.push(bSubNode.tagger)
