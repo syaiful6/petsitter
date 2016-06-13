@@ -235,7 +235,7 @@ makeEventHandler = (eventNode, info) ->
       options = info.options
       event.stopPropagation() if options.stopPropagation
       event.preventDefault() if options.preventDefault
-      message = value._0
+      message = value.value0
       currentEventNode = eventNode
       while currentEventNode
         tagger = currentEventNode.tagger

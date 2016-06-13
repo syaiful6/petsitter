@@ -9,7 +9,7 @@ send = (settings, request) ->
     req = new XMLHttpRequest()
     if settings.onStart.ctor == 'Just'
       req.addEventListener 'loadStart', ->
-        job = settings.onStart._0
+        job = settings.onStart.value0
         scheduler.rawSpawn job
         return
     if settings.onProgress.ctor == 'Just'
@@ -18,7 +18,7 @@ send = (settings, request) ->
           progress = Just({loaded: event.loaded, total: event.total})
         else
           progress = Nothing
-        job = settings.onProgress._0(progress)
+        job = settings.onProgress.value0(progress)
         scheduler.rawSpawn job
         return
 
@@ -41,12 +41,12 @@ send = (settings, request) ->
     req.withCredentials = settings.withCredentials
 
     if settings.desiredResponseType.ctor == 'Just'
-      req.overrideMimeType(settings.desiredResponseType._0)
+      req.overrideMimeType(settings.desiredResponseType.value0)
 
     if request.body.ctor == "BodyFormData"
       req.send(request.body.formData)
     else
-      req.send(request.body._0)
+      req.send(request.body.value0)
 
     ->
       req.abort()
@@ -61,7 +61,7 @@ toResponse = (req) ->
   statusText: req.statusText
   headers: parseHeaders(req.getAllResponseHeaders())
   url: req.responseURL
-  value: { ctor: tag, _0: response}
+  value: { ctor: tag, value0: response}
 
 parseHeaders = (rawHeader) ->
   headers = {}
@@ -75,7 +75,7 @@ parseHeaders = (rawHeader) ->
       if key of headers
         oldVal = headers[key]
         if oldValue.ctor
-          headers[key] = Just(value + ', ' + oldValue._0)
+          headers[key] = Just(value + ', ' + oldValue.value0)
           continue
       headers[key] = Just(value)
   headers
@@ -86,13 +86,13 @@ multipart = (dataList) ->
   # construct the form data
   formData = new FormData()
   until dataList.ctor == '[]'
-    data = dataList._0
+    data = dataList.value0
     if data.ctor == 'StringData'
-      formData.append(data._0, data._1)
+      formData.append(data.value0, data.value1)
     else
-      fileName = if data._1.ctor == 'Nothing' then undefined else data._1._0
-      formData.append(data._0, data._2, fileName)
-    dataList = dataList._1
+      fileName = if data.value1.ctor == 'Nothing' then undefined else data.value1.value0
+      formData.append(data.value0, data.value2, fileName)
+    dataList = dataList.value1
   ctor: 'BodyFormData'
   formData: formData
 
@@ -131,7 +131,7 @@ Response = functools.curry5 Response
 
 BodyBlob = (a) ->
   ctor: 'BodyBlob'
-  _0: a
+  value0: a
 
 BodyFormData =
   ctor: 'BodyFormData'
@@ -141,7 +141,7 @@ ArrayBuffer =
 
 BodyString = (a) ->
   ctor: 'BodyString'
-  _0: a
+  value0: a
 
 Empty =
   ctor: 'Empty'
@@ -151,24 +151,24 @@ empty = Empty
 
 FileData = functools.curry3 (a, b, c) ->
   ctor: 'FileData'
-  _0: a
-  _1: b
-  _2: c
+  value0: a
+  value1: b
+  value2: c
 
 BlobData = functools.curry3 (a, b, c) ->
   ctor: 'BlobData'
-  _0: a
-  _1: b
-  _2: c
+  value0: a
+  value1: b
+  value2: c
 
 StringData = functools.curry2 (a, b) ->
   ctor: 'StringData'
-  _0: a
-  _1: b
+  value0: a
+  value1: b
 
 Text = (a) ->
   ctor: 'Text'
-  _0: a
+  value0: a
 
 RawNetworkError =
   ctor: 'RawNetworkError'
@@ -178,12 +178,12 @@ RawTimeout =
 
 BadResponse = (a) -> (b) ->
   ctor: 'BadResponse'
-  _0: a
-  _1: b
+  value0: a
+  value1: b
 
 UnexpectedPayload = (a) ->
   ctor: 'UnexpectedPayload'
-  _0: a
+  value0: a
 
 NetworkError =
   ctor: 'NetworkError'
@@ -195,7 +195,7 @@ handleResponse = (handle) -> (response) ->
   if 200 <= response.status < 300
     val = response.value
     if val.ctor == 'Text'
-      handle(val._0)
+      handle(val.value0)
     else
       scheduler.fail(UnexpectedPayload("Response body is a blob, expecting a string."))
   else
@@ -222,9 +222,9 @@ fromJson = (decoder) -> (response) ->
     decoded = JSON.parse(str)
     result = decoder(decoded)
     if result.ctor == 'Ok'
-      task.succeed(result._0)
+      task.succeed(result.value0)
     else
-      task.fail(result._0)
+      task.fail(result.value0)
   functools.invoke2(scheduler.andThen, task.mapError(promoteError)(response), handleResponse(decode))
 
 get = (decoder) -> (url) ->

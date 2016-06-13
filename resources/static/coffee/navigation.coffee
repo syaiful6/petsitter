@@ -54,7 +54,7 @@ spawnPopState = (router) ->
 
 notify = (router) -> (subs) -> (location) ->
   callback = (val) ->
-    invoke2(platform.sendToApp, router, val._0(location))
+    invoke2(platform.sendToApp, router, val.value0(location))
   if Array.isArray(subs)
     subs = fromArray(subs)
   invoke2(andThenHelp, sequence(invoke2(map, callback, subs)), scheduler.succeed(Tuple0))
@@ -65,14 +65,14 @@ onSelfMsg = (router) -> (location) -> (state) ->
 
 cmdHelp = (router) -> (subs) -> (cmd) ->
   switch cmd.ctor
-    when 'Jump' then go cmd._0
-    when 'New' then invoke2 andThen, pushState(cmd._0), invoke2(notify, router, subs)
-    else invoke2 andThen, replaceState(cmd._0), invoke2(notify, router, subs)
+    when 'Jump' then go cmd.value0
+    when 'New' then invoke2 andThen, pushState(cmd.value0), invoke2(notify, router, subs)
+    else invoke2 andThen, replaceState(cmd.value0), invoke2(notify, router, subs)
 
 updateHelp = (func) -> (val) ->
   ctor: '_Tuple2'
-  _0: val._0
-  _1: invoke2 platform.map, func, val._1
+  value0: val.value0
+  value1: invoke2 platform.map, func, val.value1
 
 subscription = platform.leaf("Navigation")
 command = platform.leaf("Navigation")
@@ -99,14 +99,14 @@ init = scheduler.succeed invoke2(State, fromArray([]), Nothing)
 onEffects = (router) -> (cmds) -> (subs) -> (val) ->
   proc = val.process
   stepState = do ->
-    step = ctor: '_Tuple2', _0: subs, _1: proc
-    if step._0.ctor == '[]'
-      if step._1.ctor == 'Just'
-        return invoke2 andThenHelp, scheduler.kill(step._1._0), scheduler.succeed(State(subs)(Nothing))
+    step = ctor: '_Tuple2', value0: subs, value1: proc
+    if step.value0.ctor == '[]'
+      if step.value1.ctor == 'Just'
+        return invoke2 andThenHelp, scheduler.kill(step.value1.value0), scheduler.succeed(State(subs)(Nothing))
       else
         return scheduler.succeed State(subs)(proc)
     else
-      if step._1.ctor == 'Nothing'
+      if step.value1.ctor == 'Nothing'
         wrap = (pid) ->
           scheduler.succeed State(subs)(Just(pid))
         return invoke2 andThen, spawnPopState(router), wrap
@@ -117,35 +117,35 @@ onEffects = (router) -> (cmds) -> (subs) -> (val) ->
 
 UserMsg = (a) ->
   ctor: 'UserMsg'
-  _0: a
+  value0: a
 
 Change = (a) ->
   ctor: 'Change'
-  _0: a
+  value0: a
 
 Parser = (a) ->
   ctor: 'Parser'
-  _0: a
+  value0: a
 
 makeParser = Parser
 
 Modify = (a) ->
   ctor: 'Modify'
-  _0: a
+  value0: a
 
 modifyUrl = (url) ->
   command Modify(url)
 
 NewUrl = (a) ->
   ctor: 'New'
-  _0: a
+  value0: a
 
 newUrl = (url) ->
   command NewUrl(url)
 
 Jump = (a) ->
   ctor: 'Jump'
-  _0: a
+  value0: a
 
 back = (n) ->
   command Jump(0 - n)
@@ -155,16 +155,16 @@ forward = (n) ->
 
 cmdMap = (__) -> (myCmd) ->
   switch myCmd.ctor
-    when 'Jump' then Jump myCmd._0
-    when 'New' then NewUrl myCmd._0
-    else Modify myCmd._0
+    when 'Jump' then Jump myCmd.value0
+    when 'New' then NewUrl myCmd.value0
+    else Modify myCmd.value0
 
 Monitor = (a) ->
   ctor: 'Monitor'
-  _0: a
+  value0: a
 
 programWithFlags = (parser) -> (stuff) ->
-  data = parser._0
+  data = parser.value0
   location = getLocation()
   init = (flags) ->
     invoke2 updateHelp, UserMsg, invoke2(stuff.init, flags, data(location))
@@ -179,9 +179,9 @@ programWithFlags = (parser) -> (stuff) ->
     invoke2 updateHelp, UserMsg, do ->
       m = msg
       if m.ctor == 'Change'
-        invoke2 stuff.urlUpdate, data(m._0), model
+        invoke2 stuff.urlUpdate, data(m.value0), model
       else
-        invoke2 stuff.update, m._0, model
+        invoke2 stuff.update, m.value0, model
   app.programWithFlags
     init: init
     view: view
@@ -199,7 +199,7 @@ program = (parser) -> (stuff) ->
     newRecord
 
 subMap = (func) -> (val) ->
-  Monitor (el) -> func(val._0(el))
+  Monitor (el) -> func(val.value0(el))
 
 unless 'Navigation' of platform.effectManagers
   platform.effectManagers['Navigation'] =

@@ -7,7 +7,7 @@ onError = scheduler.onError
 andThen = scheduler.andThen
 
 spawnCmd = (router) -> (val) ->
-  scheduler.spawn(andThen(val._0)(platform.sendToApp(router)))
+  scheduler.spawn(andThen(val.value0)(platform.sendToApp(router)))
 
 fail = scheduler.fail
 
@@ -78,7 +78,7 @@ sequence = (tasks) ->
   else
     wrapped = (x) -> (y) ->
       list.cons(x)(y)
-    map2(wrapped)(tasks._0)(sequence(tasks._1))
+    map2(wrapped)(tasks.value0)(sequence(tasks.value1))
 
 onEffects = (router) -> (commands) -> (state) ->
   callback = (_x) ->
@@ -97,7 +97,7 @@ onSelfMsg = (x) -> (y) -> (z) ->
 
 T = (x) ->
   ctor: 'T'
-  _0: x
+  value0: x
 
 perform = (onFail) -> (onSuccess) -> (task) ->
   wrapped = (x) ->
@@ -105,7 +105,7 @@ perform = (onFail) -> (onSuccess) -> (task) ->
   command(T(onError(map(onSuccess)(task))(wrapped)))
 
 cmdMap = (tagger) -> (task) ->
-  T(map(tagger)(task._0))
+  T(map(tagger)(task.value0))
 
 unless 'Task' of platform.effectManagers
   platform.effectManagers['Task'] =

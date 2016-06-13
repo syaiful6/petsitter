@@ -10,8 +10,8 @@ none = batch Nil
 
 action = (model) -> (cmd) ->
   ctor: '_Tuple2'
-  _0: model
-  _1: batch(cmd)
+  value0: model
+  value1: batch(cmd)
 
 module.exports =
   map: map

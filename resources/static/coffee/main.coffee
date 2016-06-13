@@ -45,8 +45,8 @@ update = (msg) -> (model) ->
   else if ctor == 'Decrement'
     newModel = model - 1
   ctor: '_Tuple2'
-  _0: newModel
-  _1: navigation.newUrl toUrl(newModel)
+  value0: newModel
+  value1: navigation.newUrl toUrl(newModel)
 
 view = (model) ->
   div(
@@ -60,12 +60,12 @@ view = (model) ->
 urlUpdate = (result) -> (model) ->
   if result.ctor == 'Ok'
     ctor: '_Tuple2'
-    _0: result._0
-    _1: none
+    value0: result.value0
+    value1: none
   else
     ctor: '_Tuple2'
-    _0: model
-    _1: navigation.modifyUrl toUrl(model)
+    value0: model
+    value1: navigation.modifyUrl toUrl(model)
 
 init = (result) ->
   urlUpdate(result)(0)

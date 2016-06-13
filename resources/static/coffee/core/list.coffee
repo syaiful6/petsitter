@@ -6,8 +6,8 @@ Nil =
 
 Cons = (hd, tl) ->
   ctor: '::'
-  _0: hd
-  _1: tl
+  value0: hd
+  value1: tl
 
 fromArray = (arr) ->
   out = Nil
@@ -19,8 +19,8 @@ fromArray = (arr) ->
 toArray = (xs) ->
   out = []
   while xs.ctor != '[]'
-    out.push(xs._0)
-    xs = xs._1
+    out.push(xs.value0)
+    xs = xs.value1
   out
 
 range = (lo, hi) ->
@@ -44,8 +44,8 @@ foldl = (func, acc, list) ->
     if val.ctor == '[]'
       return acc
     else
-      acc = invoke2(func, val._0, acc)
-      list = val._1
+      acc = invoke2(func, val.value0, acc)
+      list = val.value1
 
 map = (f, xs) ->
   accumulator = curry2 (a, b) ->
@@ -55,9 +55,9 @@ map = (f, xs) ->
 map2 = (f, xs, ys) ->
   arr = []
   while xs.ctor != '[]' and ys.ctor != '[]'
-    arr.push(invoke2(f, xs._0, ys._0))
-    xs = xs._1
-    ys = ys._1
+    arr.push(invoke2(f, xs.value0, ys.value0))
+    xs = xs.value1
+    ys = ys.value1
   fromArray(arr)
 
 length = (list) ->
@@ -79,10 +79,10 @@ isEmpty = (list) ->
   list.ctor == '[]'
 
 tail = (list) ->
-  if list.ctor == '::' then maybe.Just(list._1) else maybe.Nothing
+  if list.ctor == '::' then maybe.Just(list.value1) else maybe.Nothing
 
 head = (list) ->
-  if list.ctor == '::' then maybe.Just(list._0) else maybe.Nothing
+  if list.ctor == '::' then maybe.Just(list.value0) else maybe.Nothing
 
 filter = (pred, xs) ->
   cond = curry2 (a, b) ->
@@ -95,7 +95,7 @@ reverse = (xs) ->
 scanl = (f, b, xs) ->
   acc = (x) -> (y) ->
     if y.ctor == '::'
-      Cons(invoke2(f, x, y._0), y)
+      Cons(invoke2(f, x, y.value0), y)
     else
       fromArray([])
   reverse(foldl(acc, fromArray[b], xs))

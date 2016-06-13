@@ -77,7 +77,7 @@ initWithoutFlags = (moduleName, realInit) -> (flags) ->
 
 initWithFlags = (moduleName, realInit, flagDecoder) -> (flags) ->
   results = flagDecoder(flags)
-  realInit(result._0)
+  realInit(result.value0)
 
 makeEmbedHelp = (moduleName, program, rootDomNode, flags) ->
   init = program.init
@@ -90,9 +90,9 @@ makeEmbedHelp = (moduleName, program, rootDomNode, flags) ->
 
   initApp = nativeBinding (callback) ->
     results = init(flags)
-    model = results._0
+    model = results.value0
     renderer = makeRenderer(rootDomNode, enqueue, view(model))
-    cmds = results._1
+    cmds = results.value1
     subs = subscriptions(model)
     dispatchEffects(managers, cmds, subs)
     callback(succeed(model))
@@ -100,9 +100,9 @@ makeEmbedHelp = (moduleName, program, rootDomNode, flags) ->
   onMessage = (msg, model) ->
     nativeBinding (callback) ->
       results = invoke2(update, msg, model)
-      model = results._0
+      model = results.value0
       renderer.update(view(model))
-      cmds = results._1
+      cmds = results.value1
       subs = subscriptions(model)
       dispatchEffects(managers, cmds, subs)
       callback(succeed(model))
@@ -141,9 +141,9 @@ makeManager = (info, callback) ->
   onSelfMsg = info.onSelfMsg
 
   onMessage = (msg, state) ->
-    return invoke3(onSelfMsg, router, msg._0, state) if msg.ctor == 'self'
+    return invoke3(onSelfMsg, router, msg.value0, state) if msg.ctor == 'self'
 
-    fx = msg._0
+    fx = msg.value0
     if tag == 'cmd'
       invoke3(onEffects, router, fx.cmds, state)
     else if tag == 'sub'
@@ -163,7 +163,7 @@ sendToApp = (router, msg) ->
 sendToSelf = (router, msg) ->
   invoke2 schedulerSend, router.self, {
     ctor: 'self',
-    _0: msg
+    value0: msg
   }
 
 spawnLoop = (init, onMessage) ->
@@ -202,7 +202,7 @@ dispatchEffects = (managers, cmdBag, subBag) ->
       fx =
         cmds: Nil
         subs: Nil
-    rawSend managers[home], { ctor: 'fx', _0: fx }
+    rawSend managers[home], { ctor: 'fx', value0: fx }
   return
 
 gatherEffects = (isCmd, bag, effectsDict, taggers) ->
@@ -215,8 +215,8 @@ gatherEffects = (isCmd, bag, effectsDict, taggers) ->
   if type == 'node'
     list = bag.branches
     while list.ctor != '[]'
-      gatherEffects(isCmd, list._0, effectsDict, taggers)
-      list = list._1
+      gatherEffects(isCmd, list.value0, effectsDict, taggers)
+      list = list.value1
     return
   if type == 'map'
     gatherEffects(isCmd, bag.tree, effectsDict, {
@@ -269,9 +269,9 @@ setupOutgoingPort = (name) ->
   init = succeed(null)
   onEffects = (outer, cmdList, state) ->
     while cmdList.ctor != '[]'
-      value = converter(cmdList._0)
+      value = converter(cmdList.value0)
       sub(value) for sub in subs
-      cmdList = cmdList._1
+      cmdList = cmdList.value1
     init
 
   effectManagers[name].init = init
@@ -314,11 +314,11 @@ setupIncomingPort = (name, callback) ->
     result = converter(value)
     if result.ctor == 'Err'
       throw new Error('Unexpected value')
-    value = result._0
+    value = result.value0
     temp = subs
     while temp.ctor != '[]'
-      callback(temp._0(value))
-      temp = temp._1
+      callback(temp.value0(value))
+      temp = temp.value1
     return
   {send: send}
 

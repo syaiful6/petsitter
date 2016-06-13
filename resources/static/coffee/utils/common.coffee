@@ -8,8 +8,8 @@ Tuple0 =
 
 Tuple2 = (x, y) ->
   ctor: '_Tuple2'
-  _0: x
-  _1: y
+  value0: x
+  value1: y
 
 chr = (x) ->
   new String(x)
