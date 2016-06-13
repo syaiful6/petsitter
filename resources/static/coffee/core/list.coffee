@@ -9,6 +9,7 @@ Cons = (hd, tl) ->
   value0: hd
   value1: tl
 
+# fromArray :: Array -> List
 fromArray = (arr) ->
   out = Nil
   i = arr.length
@@ -16,6 +17,7 @@ fromArray = (arr) ->
     out = Cons(arr[i], out)
   out
 
+# toArray :: List -> Array
 toArray = (xs) ->
   out = []
   while xs.ctor != '[]'
@@ -23,6 +25,7 @@ toArray = (xs) ->
     xs = xs.value1
   out
 
+# range :: Number -> Number -> List
 range = (lo, hi) ->
   list = Nil
   if lo < hi
@@ -30,6 +33,7 @@ range = (lo, hi) ->
       list = Cons(hi, list)
   list
 
+# foldr ::
 foldr = (f, b, xs) ->
   arr = toArray(xs)
   acc = b
@@ -78,9 +82,11 @@ product = (numbers) ->
 isEmpty = (list) ->
   list.ctor == '[]'
 
+# tail :: List -> Maybe a
 tail = (list) ->
   if list.ctor == '::' then maybe.Just(list.value1) else maybe.Nothing
 
+# head :: List -> Maybe a
 head = (list) ->
   if list.ctor == '::' then maybe.Just(list.value0) else maybe.Nothing
 

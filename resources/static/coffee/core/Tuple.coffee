@@ -16,7 +16,7 @@ swap = (tuple) ->
   Tuple(value1)(value0)
 
 fst = (tuple) ->
-  tuple.value1
+  tuple.value0
 
 snd = (tuple) ->
   tuple.value1

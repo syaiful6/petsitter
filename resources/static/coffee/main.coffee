@@ -4,25 +4,27 @@
 {onClick} = require './dom/events'
 {Ok, Err} = require './core/result'
 {div, button, text, span} = require './dom/helper'
+{invoke2} = require './utils/functools'
 navigation = require './navigation'
+
+toString = Object::toString
 
 subscriptions = (model) ->
   none
 
+isNumber = (value) ->
+  typeof value == 'number' or value and typeof value == 'object' and toString.call(value) == '[object Number]' or false
+
+isFinite = (value) ->
+  window.isFinite(value) and not window.isNaN(parseFloat(value))
+
 fromUrl = (url) ->
-  len = url.length
-  return Err('could not convert empty string to integer') if len == 0
   s = url.slice(2)
-  start = 0
-  if url[0] == '-'
-    if len == 1
-      return Err("could not convert string '" + s + "' to an Int" )
-    start = 1
-  for i in [start...length]
-    c = s[i]
-    if c < '0' or '9' < c
-      return Err("could not convert string '" + s + "' to an Int" )
-  Ok(parseInt(s, 10))
+  number = new Number(s)
+  if not isNumber(number) or not isFinite(number)
+    Err('the url not a number')
+  else
+    Ok(number)
 
 toUrl = (count) ->
   '#/' + count.toString()
@@ -38,6 +40,7 @@ Increment = ->
 Decrement = ->
   ctor: 'Decrement'
 
+# update :: Msg -> Model -> (Model, Cmd)
 update = (msg) -> (model) ->
   ctor = msg.ctor
   if ctor == 'Increment'
@@ -57,6 +60,7 @@ view = (model) ->
     ]
   )
 
+# urlUpdate :: Result -> Model -> (Model, Cmd)
 urlUpdate = (result) -> (model) ->
   if result.ctor == 'Ok'
     ctor: '_Tuple2'
@@ -70,7 +74,14 @@ urlUpdate = (result) -> (model) ->
 init = (result) ->
   urlUpdate(result)(0)
 
-main = navigation.program(urlParser)({subscriptions: subscriptions, model: model, view: view, update: update, init: init, urlUpdate: urlUpdate})
+main = invoke2 navigation.program, urlParser, {
+  subscriptions: subscriptions
+  model: model
+  view: view
+  update: update
+  init: init
+  urlUpdate: urlUpdate
+}
 
 app = startApp(main)
 node = document.getElementById('app')
