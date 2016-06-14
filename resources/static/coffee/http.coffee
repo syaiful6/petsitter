@@ -1,8 +1,8 @@
-scheduler = require './scheduler'
-task = require './task'
-{Just, Nothing} = require './maybe'
-{fromArray} = require './list'
-functools = require '../utils/functools'
+scheduler = require './core/scheduler'
+task = require './core/task'
+{Just, Nothing} = require './core/data/maybe'
+{fromArray} = require './core/data/list'
+functools = require './utils/functools'
 
 send = (settings, request) ->
   scheduler.nativeBinding (callback) ->

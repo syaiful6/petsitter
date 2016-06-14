@@ -2,7 +2,7 @@
 {none} = require './core/cmd/sub'
 {startApp} = require './core/platform'
 {onClick} = require './dom/events'
-{Ok, Err} = require './core/result'
+{Ok, Err} = require './core/data/result'
 {div, button, text, span} = require './dom/helper'
 {invoke2} = require './utils/functools'
 navigation = require './navigation'

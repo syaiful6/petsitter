@@ -1,4 +1,4 @@
-{ invoke2, curry2, curry3 } = require '../utils/functools'
+{ invoke2, curry2, curry3 } = require '../../utils/functools'
 maybe = require './maybe'
 
 Nil =

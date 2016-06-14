@@ -1,5 +1,5 @@
 vdom = require './vdom'
-{ok} = require '../core/result'
+{ok} = require '../core/data/result'
 functools = require '../utils/functools'
 
 defaultOptions =

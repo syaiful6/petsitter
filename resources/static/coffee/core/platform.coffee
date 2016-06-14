@@ -1,4 +1,4 @@
-{Nil, Cons} = require './list'
+{Nil, Cons} = require './data/list'
 {Tuple0, Tuple2} = require '../utils/common'
 {programWithFlags} = require '../dom/vdom'
 {curry2, curry3, invoke2, invoke3, invoke4} = require '../utils/functools'

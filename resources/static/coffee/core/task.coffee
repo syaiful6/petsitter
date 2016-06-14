@@ -1,7 +1,7 @@
 scheduler = require './scheduler'
 platform = require './platform'
-maybe = require './maybe'
-list = require './list'
+maybe = require './data/maybe'
+list = require './data/list'
 
 onError = scheduler.onError
 andThen = scheduler.andThen
