@@ -3,6 +3,9 @@
 # a Semigroupid similiar to Category, but does not require an id
 #  element `id`, just composable morphisms.
 # https://en.wikipedia.org/wiki/Semigroupoid
+Unit = (x) ->
+  x
+
 Semigroupoid = (compose) ->
   ctor: 'Semigroupoid'
   # compose :: forall b c d. a c d -> a b c -> a b d
@@ -74,6 +77,8 @@ ap = (dictMonad) -> (f) -> (a) ->
       pure(dictMonad.applicative())(v(v1))
     )
   )
+
+unit = {}
 
 # an instance of Semigroup
 semigroupoidFn = Semigroupoid (f) -> (g) -> (x) -> f g x
@@ -162,4 +167,6 @@ module.exports =
   applicativeArray: applicativeArray
   bindArray: bindArray
   functorArray: functorArray
+  unit: unit
+  Unit: Unit
 

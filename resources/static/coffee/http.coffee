@@ -1,6 +1,7 @@
 scheduler = require './core/scheduler'
 task = require './core/task'
 {Just, Nothing} = require './core/data/maybe'
+{either} = require './core/data/either'
 {fromArray} = require './core/data/list'
 functools = require './utils/functools'
 
@@ -221,10 +222,7 @@ fromJson = (decoder) -> (response) ->
   decode = (str) ->
     decoded = JSON.parse(str)
     result = decoder(decoded)
-    if result.ctor == 'Ok'
-      task.succeed(result.value0)
-    else
-      task.fail(result.value0)
+    either(task.fail)(task.succeed)(result)
   functools.invoke2(scheduler.andThen, task.mapError(promoteError)(response), handleResponse(decode))
 
 get = (decoder) -> (url) ->

@@ -312,7 +312,7 @@ setupIncomingPort = (name, callback) ->
 
   send = (value) ->
     result = converter(value)
-    if result.ctor == 'Err'
+    if result.ctor == 'Left'
       throw new Error('Unexpected value')
     value = result.value0
     temp = subs

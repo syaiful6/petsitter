@@ -231,7 +231,7 @@ makeEventHandler = (eventNode, info) ->
   eventHandler = (event) ->
     info = eventHandler.info
     value = info.decoder(event)
-    if value.ctor == 'Ok'
+    if value.ctor == 'Right'
       options = info.options
       event.stopPropagation() if options.stopPropagation
       event.preventDefault() if options.preventDefault

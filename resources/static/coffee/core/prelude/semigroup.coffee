@@ -5,8 +5,8 @@ Semigroup = (append) ->
 append = (dictSemigroup) ->
   dictSemigroup.append
 
-semigroupString = Semigroup((s) -> (s1) -> s + s1);
-semigroupArray = Semigroup((a) -> (a1) -> a.concat(a1));
+semigroupString = Semigroup((s) -> (s1) -> s + s1)
+semigroupArray = Semigroup((a) -> (a1) -> a.concat(a1))
 
 module.exports =
   Semigroup: Semigroup

@@ -1,5 +1,5 @@
 vdom = require './vdom'
-{ok} = require '../core/data/result'
+either = require '../core/data/either'
 functools = require '../utils/functools'
 
 defaultOptions =
@@ -11,22 +11,22 @@ event = (eventName, decoder) ->
 
 onClick = (msg) ->
   decoder = (e) ->
-    ok(msg())
+    either.Right(msg())
   event 'click', decoder
 
 onDoubleClick = (msg) ->
   decoder = (e) ->
-    ok(msg())
+    either.Right(msg())
   event 'dbclick', decoder
 
 onInput = (msg) ->
   decoder = (ev) ->
-    ok(msg(ev.target.value))
+    either.Right(msg(ev.target.value))
   event 'input', decoder
 
 onChange = (msg) ->
   decoder = (ev) ->
-    ok(msg(ev.target.value))
+    either.Right(msg(ev.target.value))
   event 'change', decoder
 
 module.exports =

@@ -1,4 +1,4 @@
-semigroup = require './semigroup'
+semigroup = require '../prelude/semigroup'
 
 Monoid = (semigroup, mempty) ->
   ctor: 'Monoid'

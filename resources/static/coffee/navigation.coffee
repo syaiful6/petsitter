@@ -1,9 +1,9 @@
 scheduler = require './core/scheduler'
 platform = require './core/platform'
+{Right} = require './core/data/either'
 {Just, Nothing} = require './core/data/maybe'
 {map, fromArray} = require './core/data/list'
 {sequence, andThen} = require './core/task'
-{ok} = require './core/data/result'
 {invoke3, invoke2} = require './utils/functools'
 {Tuple0} = require './utils/common'
 {onWindow} = require './dom/window'
@@ -50,7 +50,7 @@ andThenHelp = (task1) -> (task2) ->
 spawnPopState = (router) ->
   toTask = (_e) ->
     invoke2(platform.sendToSelf, router, getLocation())
-  scheduler.spawn invoke3(onWindow, 'popstate', ok, toTask)
+  scheduler.spawn invoke3(onWindow, 'popstate', Right, toTask)
 
 notify = (router) -> (subs) -> (location) ->
   callback = (val) ->

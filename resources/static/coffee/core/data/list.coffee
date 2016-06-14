@@ -25,13 +25,17 @@ toArray = (xs) ->
     xs = xs.value1
   out
 
-# range :: Number -> Number -> List
+# range :: Int -> Int -> List Int
 range = (lo, hi) ->
   list = Nil
   if lo < hi
     while hi-- > lo
       list = Cons(hi, list)
   list
+
+# singleton :: forall a. a -> List a
+singleton = (a) ->
+  Cons a, Nil
 
 # foldr ::
 foldr = (f, b, xs) ->

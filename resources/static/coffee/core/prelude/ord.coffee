@@ -50,6 +50,11 @@ ordNumber = Ord ->
   eqNumber
 , unsafeCompare
 
+eqInt = Eq (v) -> (v1) -> v == v1
+ordInt = Ord ->
+  eqInt
+, unsafeCompare
+
 eqArray = (dictEq) ->
   eqArrayImpl = (f) -> (xs) -> (ys) ->
     return false if xs.length != ys.length
@@ -101,3 +106,5 @@ module.exports =
   ordNumber: ordNumber
   ordString: ordString
   ordArray: ordArray
+  eqInt: eqInt
+  ordInt: ordInt

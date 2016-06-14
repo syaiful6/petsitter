@@ -2,9 +2,10 @@
 {none} = require './core/cmd/sub'
 {startApp} = require './core/platform'
 {onClick} = require './dom/events'
-{Ok, Err} = require './core/data/result'
 {div, button, text, span} = require './dom/helper'
-{invoke2} = require './utils/functools'
+{invoke2, invoke3} = require './utils/functools'
+tuple = require './core/data/tuple'
+either = require './core/data/either'
 navigation = require './navigation'
 
 toString = Object::toString
@@ -22,9 +23,9 @@ fromUrl = (url) ->
   s = url.slice(2)
   number = new Number(s)
   if not isNumber(number) or not isFinite(number)
-    Err('the url not a number')
+    either.Left('the url not a number')
   else
-    Ok(number)
+    either.Right(number)
 
 toUrl = (count) ->
   '#/' + count.toString()
@@ -47,9 +48,7 @@ update = (msg) -> (model) ->
     newModel = model + 1
   else if ctor == 'Decrement'
     newModel = model - 1
-  ctor: '_Tuple2'
-  value0: newModel
-  value1: navigation.newUrl toUrl(newModel)
+  tuple.Tuple newModel, navigation.newUrl toUrl(newModel)
 
 view = (model) ->
   div(
@@ -60,19 +59,19 @@ view = (model) ->
     ]
   )
 
-# urlUpdate :: Result -> Model -> (Model, Cmd)
-urlUpdate = (result) -> (model) ->
-  if result.ctor == 'Ok'
-    ctor: '_Tuple2'
-    value0: result.value0
-    value1: none
-  else
-    ctor: '_Tuple2'
-    value0: model
-    value1: navigation.modifyUrl toUrl(model)
+# urlUpdate :: Either -> Model -> (Model, Cmd)
+urlUpdateOnError = (model) ->
+  ->
+    tuple.Tuple model, navigation.modifyUrl toUrl(model)
+
+urlUpdateOnSuccess = (v) ->
+  tuple.Tuple v, none
+
+urlUpdate = (eith) -> (model) ->
+  invoke3 either.either, urlUpdate(model), urlUpdateOnSuccess, eith
 
 init = (result) ->
-  urlUpdate(result)(0)
+  invoke2 urlUpdate, result, 0
 
 main = invoke2 navigation.program, urlParser, {
   subscriptions: subscriptions
