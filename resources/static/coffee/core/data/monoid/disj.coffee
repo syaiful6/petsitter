@@ -22,7 +22,7 @@ semiringDisj = (dictBooleanAlgebra) ->
       boolAlgebra.disj(dictBooleanAlgebra)(v)(v1)
   , (v) ->
       (v1) ->
-        boolAlgebra.disj(dictBooleanAlgebra)(v)(v1)
+        boolAlgebra.conj(dictBooleanAlgebra)(v)(v1)
   , boolAlgebra.top(dictBooleanAlgebra.bounded())
   , boolAlgebra.bottom(dictBooleanAlgebra.bounded())
 

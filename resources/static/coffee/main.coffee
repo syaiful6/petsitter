@@ -24,7 +24,8 @@ isFinite = (value) ->
 # fromUrl :: String -> Either a
 fromUrl = (url) ->
   s = url.slice(2)
-  number = new Number(s)
+  return either.Left('an empty string, cant convert it to a number') if s.length == 0
+  number = Number(s)
   if not isNumber(number) or not isFinite(number)
     either.Left('the url not a number')
   else

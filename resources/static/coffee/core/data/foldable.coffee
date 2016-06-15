@@ -4,8 +4,10 @@ preludeControl = require '../prelude/control'
 controlApply = require '../control/apply'
 preludeRing = require '../prelude/ring'
 monoid = require './monoid'
+monoidDisj = require './monoid/disj'
 basic = require '../basic'
 {append} = require '../prelude/semigroup'
+{ invoke2, invoke3 } = require '../../utils/functools'
 
 Foldable = (foldMap, foldl, foldr) ->
   {
@@ -28,7 +30,7 @@ foldMap = (dictFoldable) ->
   dictFoldable.foldMap
 
 fold = (dictFoldable) -> (dictMonoid) ->
-  foldMap(dictFoldable)(dictMonoid)(preludeControl.id(preludeControl.categoryFn))
+  invoke3 foldMap, dictFoldable, dictMonoid, preludeControl.id(preludeControl.categoryFn)
 
 traverse_ = (dictApplicative) -> (dictFoldable) -> (f) ->
   u = preludeControl.pure(dictApplicative)(preludeControl.unit)
@@ -38,10 +40,10 @@ traverse_ = (dictApplicative) -> (dictFoldable) -> (f) ->
     rs(u)
 
 for_ = (dictApplicative) -> (dictFoldable) ->
-  basic.flip traverse_(dictApplicative)(dictFoldable)
+  basic.flip invoke2(traverse_, dictApplicative, dictFoldable)
 
 sequence_ = (dictApplicative) -> (dictFoldable) ->
-  traverse_(dictApplicative)(dictFoldable)(preludeControl.id(preludeControl.categoryFn))
+  invoke3 traverse_, dictApplicative, dictFoldable, preludeControl.id(preludeControl.categoryFn)
 
 maximumBy = (dictFoldable) -> (cmp) ->
   max$prime = (v) -> (v1) ->
@@ -51,13 +53,13 @@ maximumBy = (dictFoldable) -> (cmp) ->
       return maybe.Just do ->
         c = cmp(v.value0)(v1)
         if c.ctor == 'GT' then v.value0 else v1
-  foldl(dictFoldable)(max$prime)(maybe.Nothing)
+  invoke3 foldl, dictFoldable, max$prime, maybe.Nothing
 
 maximum = (dictOrd) -> (dictFoldable) ->
-  maximumBy(dictFoldable)(preludeOrd.compare(dictOrd))
+  invoke2 maximumBy, dictFoldable, preludeOrd.compare(dictOrd)
 
 mconcat = (dictFoldable) -> (dictMonoid) ->
-  foldl(dictFoldable)(append(dictMonoid.semigroup()))(monoid.mempty(dictMonoid))
+  invoke2 foldl(dictFoldable), append(dictMonoid.semigroup()), monoid.mempty(dictMonoid)
 
 minimumBy = (dictFoldable) -> (cmp) ->
   min$prime = (v) -> (v1) ->
@@ -67,13 +69,16 @@ minimumBy = (dictFoldable) -> (cmp) ->
       return maybe.Just do ->
         c = cmp(v.value0)(v1)
         if c.ctor == 'LT' then v.value0 else v1
-  foldl(dictFoldable)(max$prime)(maybe.Nothing)
+  invoke3 foldl, dictFoldable, min$prime, maybe.Nothing
 
 minimum = (dictOrd) -> (dictFoldable) ->
-  minimumBy(dictFoldable)(preludeOrd.compare(dictOrd))
+  invoke2 minimumBy, dictFoldable, preludeOrd.compare(dictOrd)
 
 sum = (dictFoldable) -> (dictSemiring) ->
-  foldl(dictFoldable)(preludeRing.add(dictSemiring))(preludeRing.zero(dictSemiring))
+  invoke2 foldl(dictFoldable), preludeRing.add(dictSemiring), preludeRing.zero(dictSemiring)
+
+product = (dictFoldable) -> (dictSemiring) ->
+  invoke2 foldl(dictFoldable), preludeRing.mul(dictSemiring), preludeRing.one(dictSemiring)
 
 foldMapDefaultR = (dictFoldable) ->
   (dictMonoid) ->
@@ -125,6 +130,18 @@ foldableMaybe = do ->
     throw new Error("unexpected value detected")
   Foldable foldMMaybe, foldLMaybe, foldRMaybe
 
+find = (dictFoldable) -> (p) ->
+  $finder = (r) -> (x) ->
+    pred = p(x)
+    if pred then maybe.Just(x) else r
+  invoke3 foldl, dictFoldable, $finder, maybe.Nothing
+
+any = (dictFoldable) -> (dictBooleanAlgebra) -> (p) -> (x) ->
+  wrapper = (t) ->
+    monoidDisj.Disj p(t)
+  runIt = invoke3 foldMap(dictFoldable), monoidDisj.monoidDisj(dictBooleanAlgebra), wrapper, x
+  monoidDisj.runDisj runIt
+
 module.exports =
   Foldable: Foldable
   foldMap: foldMap
@@ -140,3 +157,5 @@ module.exports =
   foldMapDefaultL: foldMapDefaultL
   foldableArray: foldableArray
   foldableMaybe: foldableMaybe
+  sequence_: sequence_
+  for_: for_

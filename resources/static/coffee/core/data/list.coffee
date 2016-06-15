@@ -1,5 +1,9 @@
-{ invoke2, curry2, curry3 } = require '../../utils/functools'
 maybe = require './maybe'
+control = require '../prelude/control'
+foldable = require './foldable'
+monoid = require './monoid'
+semigroup = require '../prelude/semigroup'
+{ invoke2, invoke3, curry2, curry3 } = require '../../utils/functools'
 
 Nil =
   ctor: '[]'
@@ -8,6 +12,13 @@ Cons = (hd, tl) ->
   ctor: '::'
   value0: hd
   value1: tl
+
+uncons = (ls) ->
+  return maybe.Nothing if v.ctor == '[]'
+  maybe.Just {
+    head: value0
+    tail: value1
+  }
 
 # fromArray :: Array -> List
 fromArray = (arr) ->
@@ -120,6 +131,16 @@ concat = (xs) ->
 concatMap = (fun, list) ->
   concat(map(fun, list))
 
+functorList = control.Functor curry2(map)
+foldableList = foldable.Foldable (dictMonoid) ->
+  (f) ->
+    foldMWrapper = (acc) ->
+      (v) ->
+        invoke3 semigroup.append, dictMonoid.semigroup(), acc, f(v)
+    invoke3 foldable.foldl, foldableList, foldMWrapper, monoid.mempty(dictMonoid)
+, curry3(foldl)
+, curry3(foldr)
+
 module.exports =
   Nil: Nil
   Cons: Cons
@@ -142,3 +163,5 @@ module.exports =
   head: head
   concat: concat
   concatMap: curry2(concatMap)
+  functorList: functorList
+  foldableList: foldableList

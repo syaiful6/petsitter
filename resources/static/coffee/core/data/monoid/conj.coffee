@@ -21,7 +21,7 @@ semiringConj = (dictBooleanAlgebra) ->
       boolAlgebra.conj(dictBooleanAlgebra)(v)(v1)
   , (v) ->
       (v1) ->
-        boolAlgebra.conj(dictBooleanAlgebra)(v)(v1)
+        boolAlgebra.disj(dictBooleanAlgebra)(v)(v1)
   , boolAlgebra.bottom(dictBooleanAlgebra.bounded())
   , boolAlgebra.top(dictBooleanAlgebra.bounded())
 
