@@ -13,12 +13,15 @@ toString = Object::toString
 subscriptions = (model) ->
   none
 
+# isNumber :: any -> Boolean
 isNumber = (value) ->
   typeof value == 'number' or value and typeof value == 'object' and toString.call(value) == '[object Number]' or false
 
+# isFinite :: any -> Boolean
 isFinite = (value) ->
   window.isFinite(value) and not window.isNaN(parseFloat(value))
 
+# fromUrl :: String -> Either a
 fromUrl = (url) ->
   s = url.slice(2)
   number = new Number(s)
@@ -27,6 +30,7 @@ fromUrl = (url) ->
   else
     either.Right(number)
 
+# toUrl :: Int -> String
 toUrl = (count) ->
   '#/' + count.toString()
 
@@ -59,19 +63,22 @@ view = (model) ->
     ]
   )
 
-# urlUpdate :: Either -> Model -> (Model, Cmd)
+# urlUpdateOnError :: Model -> * -> (Model, Cmd)
 urlUpdateOnError = (model) ->
   ->
     tuple.Tuple model, navigation.modifyUrl toUrl(model)
 
+# urlUpdateOnSuccess :: Model -> Int -> (Model, Cmd)
 urlUpdateOnSuccess = (v) ->
   tuple.Tuple v, none
 
+# urlUpdate :: Either a -> Model -> (Model, Cmd)
 urlUpdate = (eith) -> (model) ->
-  invoke3 either.either, urlUpdate(model), urlUpdateOnSuccess, eith
+  invoke3 either.either, urlUpdateOnError(model), urlUpdateOnSuccess, eith
 
-init = (result) ->
-  invoke2 urlUpdate, result, 0
+# init :: Either a -> (Model, Cmd)
+init = (eith) ->
+  invoke2 urlUpdate, eith, 0
 
 main = invoke2 navigation.program, urlParser, {
   subscriptions: subscriptions

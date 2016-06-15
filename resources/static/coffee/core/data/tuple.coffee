@@ -4,6 +4,8 @@ foldable = require './foldable'
 monoid = require './monoid'
 extend = require '../control/extend'
 comonad = require '../control/comonad'
+{Show, show} = require '../prelude/show'
+semiring = require '../prelude/ring'
 
 # tuple data structure
 Tuple = (value0, value1) ->
@@ -32,9 +34,36 @@ snd = (v) ->
 fst = (v) ->
   v.value0
 
+showTuple = (dictShow) ->
+  (dictShow1) ->
+    Show (v) ->
+      "Tuple (" + show(dictShow)(v.value0) + ") (" + show(dictShow1)(v.value1) + ")"
+
 semigroupoidTuple = control.Semigroupoid (v) ->
   (v1) ->
     Tuple v1.value0, v.value1
+
+semiringTuple = (dictSemiring) ->
+  (dictSemiring1) ->
+    semiring.Semiring (v) ->
+      (v1) ->
+        c = create semiring.add(dictSemiring)(v.value0)(v1.value0)
+        c semiring.add(dictSemiring1)(v.value1)(v1.value1)
+    , (v) ->
+        (v1) ->
+          c = create semiring.mul(dictSemiring)(v.value0)(v1.value0)
+          c semiring.mul(dictSemiring1)(v.value1)(v1.value1)
+    , Tuple semiring.one(dictSemiring), semiring.one(dictSemiring1)
+    , Tuple semiring.zero(dictSemiring), semiring.zero(dictSemiring1)
+
+ringTuple = (dictRing) ->
+  (dictRing1) ->
+    semiring.Ring ->
+      semiringTuple(dictRing.semiring())(dictRing1.semiring())
+    , (v) ->
+        (v1) ->
+          s = create semiring.sub(dictRing)(v.value0)(v1.value0)
+          s semiring.sub(dictRing1)(v.value1)(v1.value1)
 
 semigroupTuple = (dictSemigroup) ->
   (dictSemigroup1) ->

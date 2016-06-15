@@ -1,4 +1,4 @@
-control = require '../control'
+control = require '../prelude/control'
 
 returnE = (a) ->
   ->
