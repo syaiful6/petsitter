@@ -6,7 +6,7 @@ internal = (node) -> (eventName, decoder, toTask) ->
     performTask = (event) ->
       result = decoder(event)
       if result.ctor == 'Right'
-        scheduler.rawSpawn(toTask(result._0))
+        scheduler.rawSpawn(toTask(result.value0))
       return
     node.addEventListener(eventName, performTask)
 

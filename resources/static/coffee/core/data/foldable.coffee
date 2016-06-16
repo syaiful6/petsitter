@@ -103,7 +103,7 @@ foldableArray = do ->
     acc = init
     i = xs.length
     while i--
-      acc = f(xs[item])(acc)
+      acc = f(xs[i])(acc)
     acc
   foldlArray = (f) -> (init) -> (xs) ->
     acc = init

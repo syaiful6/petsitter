@@ -1,8 +1,10 @@
 basic = require '../basic'
 ord = require '../prelude/ord'
+foldable = require './foldable'
 semigroup = require '../prelude/semigroup'
 control = require '../prelude/control'
 alt = require '../control/alt'
+monoid = require './monoid'
 extend = require '../control/extend'
 
 Left = (v) ->
@@ -22,9 +24,28 @@ semigroupEither = (dictSemigroup) ->
     control.apply(applyEither)(control.map(functorEither)(semigroup.append(dictSemigroup))(x))(y)
 
 functorEither = control.Functor (v) -> (v1) ->
-  return Left(v1.value0) if v1.ctor == 'Left'
-  return Right(v1.value0) if v1.ctor == 'Right'
+  return Left v1.value0 if v1.ctor == 'Left'
+  return Right v(v1.value0) if v1.ctor == 'Right'
   throw new Error('Failed pattern. Unexpected value received')
+
+foldableEither = foldable.Foldable (dictMonoid) ->
+  (f) ->
+    (v) ->
+      return monoid.mempty dictMonoid if v.ctor == 'Left'
+      return f v.value0 if v.ctor == 'Right'
+      throw new Error('Failed pattern. Unexpected value received')
+, (f) ->
+    (z) ->
+      (v) ->
+        return z if v.ctor == 'Left'
+        return f(z)(v1.value0) if v.ctor == 'Right'
+        throw new Error('Failed pattern. Unexpected value received')
+, (f) ->
+    (z) ->
+      (v) ->
+        return z if v.ctor == 'Left'
+        return f(v.value0)(z) if v.ctor == 'Right'
+        throw new Error('Failed pattern. Unexpected value received')
 
 extendEither = extend.Extend ->
   functorEither
@@ -108,3 +129,4 @@ module.exports =
   applicativeEither: applicativeEither
   monadEither: monadEither
   altEither: altEither
+  foldableEither: foldableEither
