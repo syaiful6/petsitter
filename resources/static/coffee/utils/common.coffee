@@ -14,12 +14,16 @@ Tuple2 = (x, y) ->
 chr = (x) ->
   new String(x)
 
+# update Old record to new fields
 update = (oldRecord, updatedFields) ->
   newRecord = {}
   for own key of oldRecord
     value = if key of updatedFields then updatedFields[key] else oldRecord[key]
     newRecord[key] = value
   newRecord
+
+getInstance = (self, ctor) ->
+  if self instanceof ctor then self else Object.create ctor.prototype
 
 module.exports =
   guid: guid
