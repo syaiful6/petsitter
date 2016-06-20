@@ -3,9 +3,9 @@
 {startApp} = require './core/platform'
 {onClick} = require './dom/events'
 {div, button, text, span} = require './dom/helper'
-{invoke2, invoke3} = require './utils/functools'
-tuple = require './core/data/tuple'
-either = require './core/data/either'
+{curry} = require './core/lambda'
+tuple = require './data/tuple'
+Either = require './data/either'
 navigation = require './navigation'
 
 toString = Object::toString
@@ -24,12 +24,12 @@ isFinite = (value) ->
 # fromUrl :: String -> Either a
 fromUrl = (url) ->
   s = url.slice(2)
-  return either.Left('an empty string, cant convert it to a number') if s.length == 0
+  return Either.Left('an empty string, cant convert it to a number') if s.length == 0
   number = Number(s)
   if not isNumber(number) or not isFinite(number)
-    either.Left('the url not a number')
+    Either.Left('the url not a number')
   else
-    either.Right(number)
+    Either.Right(number)
 
 # toUrl :: Int -> String
 toUrl = (count) ->
@@ -47,7 +47,7 @@ Decrement = ->
   ctor: 'Decrement'
 
 # update :: Msg -> Model -> (Model, Cmd)
-update = (msg) -> (model) ->
+update = curry (msg, model) ->
   ctor = msg.ctor
   if ctor == 'Increment'
     newModel = model + 1
@@ -74,14 +74,14 @@ urlUpdateOnSuccess = (v) ->
   tuple.Tuple v, none
 
 # urlUpdate :: Either a -> Model -> (Model, Cmd)
-urlUpdate = (eith) -> (model) ->
-  invoke3 either.either, urlUpdateOnError(model), urlUpdateOnSuccess, eith
+urlUpdate = curry (eith, model) ->
+  Either.either urlUpdateOnError(model), urlUpdateOnSuccess, eith
 
 # init :: Either a -> (Model, Cmd)
 init = (eith) ->
-  invoke2 urlUpdate, eith, 0
+  urlUpdate eith, 0
 
-main = invoke2 navigation.program, urlParser, {
+main = navigation.program urlParser, {
   subscriptions: subscriptions
   model: model
   view: view

@@ -1,7 +1,7 @@
-{Nil, Cons} = require './data/list'
+{Nil, Cons} = require '../data/list'
 {Tuple0, Tuple2} = require '../utils/common'
 {programWithFlags} = require '../dom/vdom'
-{curry2, curry3, invoke2, invoke3, invoke4} = require '../utils/functools'
+{curry} = require './lambda'
 
 # hmm
 { send,
@@ -59,7 +59,7 @@ mainToProgram = (moduleName, wrappedMain) ->
     return programWithFlags(
         init: -> noChange
         view: -> main
-        update: curry2(-> noChange)
+        update: curry.to(2, -> noChange)
         subscriptions: -> emptyBag
       )
   flags = wrappedMain.flags
@@ -99,7 +99,7 @@ makeEmbedHelp = (moduleName, program, rootDomNode, flags) ->
 
   onMessage = (msg, model) ->
     nativeBinding (callback) ->
-      results = invoke2(update, msg, model)
+      results = update(msg)(model)
       model = results.value0
       renderer.update(view(model))
       cmds = results.value1
@@ -141,15 +141,15 @@ makeManager = (info, callback) ->
   onSelfMsg = info.onSelfMsg
 
   onMessage = (msg, state) ->
-    return invoke3(onSelfMsg, router, msg.value0, state) if msg.ctor == 'self'
+    return onSelfMsg(router, msg.value0, state) if msg.ctor == 'self'
 
     fx = msg.value0
     if tag == 'cmd'
-      invoke3(onEffects, router, fx.cmds, state)
+      onEffects(router, fx.cmds, state)
     else if tag == 'sub'
-      invoke3(onEffects, router, fx.subs, state)
+      onEffects(router, fx.subs, state)
     else if tag == 'fx'
-      invoke4(onEffects, router, fx.cmds, fx.subs, state)
+      onEffects(router, fx.cmds, fx.subs, state)
 
   process = spawnLoop(info.init, onMessage)
   router.self = process
@@ -161,18 +161,18 @@ sendToApp = (router, msg) ->
     callback(succeed(Tuple0))
 
 sendToSelf = (router, msg) ->
-  invoke2 schedulerSend, router.self, {
+  schedulerSend(router.self, {
     ctor: 'self',
     value0: msg
-  }
+  })
 
 spawnLoop = (init, onMessage) ->
   mainLoop = (state) ->
     handleMsg = receive (msg) ->
       onMessage(msg, state)
-    invoke2(andThen, handleMsg, mainLoop)
+    andThen(handleMsg, mainLoop)
   # set the task
-  taskP = invoke2(andThen, init, mainLoop)
+  taskP = andThen(init, mainLoop)
   rawSpawn(taskP)
 
 # bags
@@ -233,7 +233,7 @@ toEffect = (isCmd, home, taggers, value) ->
       temp = temp.rest
     x
   eff = if isCmd then effectManagers[home].cmdMap else effectManagers[home].subMap
-  invoke2(eff, applyTaggers, value)
+  eff(applyTaggers, value)
 
 insert = (isCmd, newEffect, effects) ->
   effects = effects or {
@@ -259,7 +259,7 @@ outgoingPort = (name, converter) ->
     isForeign: true
   leaf(effectManagers)
 
-outgoingPortMap = curry2 (tagger, value) ->
+outgoingPortMap = curry (tagger, value) ->
   value
 
 setupOutgoingPort = (name) ->
@@ -275,7 +275,7 @@ setupOutgoingPort = (name) ->
     init
 
   effectManagers[name].init = init
-  effectManagers[name].onEffects = curry3(onEffects)
+  effectManagers[name].onEffects = curry(onEffects)
 
   subscribe = (callback) ->
     subs.push(callback)
@@ -295,7 +295,7 @@ incomingPort = (name, converter) ->
     isForeign: true
   leaf(name)
 
-incomingPortMap = curry2 (tagger, finalTagger) -> (value) ->
+incomingPortMap = curry (tagger, finalTagger) -> (value) ->
   tagger(finalTagger(value))
 
 setupIncomingPort = (name, callback) ->
@@ -308,7 +308,7 @@ setupIncomingPort = (name, callback) ->
     init
 
   effectManagers[name].init = init
-  effectManagers[name].onEffects = curry3(onEffects)
+  effectManagers[name].onEffects = curry(onEffects)
 
   send = (value) ->
     result = converter(value)
@@ -323,8 +323,8 @@ setupIncomingPort = (name, callback) ->
   {send: send}
 
 module.exports =
-  sendToApp: curry2(sendToApp)
-  sendToSelf: curry2(sendToSelf)
+  sendToApp: curry(sendToApp)
+  sendToSelf: curry(sendToSelf)
   mainToProgram: mainToProgram
   effectManagers: effectManagers
   outgoingPort: outgoingPort
@@ -332,5 +332,5 @@ module.exports =
   addPublicModule: addPublicModule
   leaf: leaf
   batch: batch
-  map: curry2(map)
+  map: curry(map)
   startApp: startApp

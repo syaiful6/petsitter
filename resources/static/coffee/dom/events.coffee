@@ -1,13 +1,13 @@
 vdom = require './vdom'
-either = require '../core/data/either'
-functools = require '../utils/functools'
+either = require '../data/either'
+{curry} = require '../core/lambda'
 
 defaultOptions =
   stopPropagation: off
   preventDefault: off
 
 event = (eventName, decoder) ->
-  vdom.event(eventName)(defaultOptions)(decoder)
+  vdom.event(eventName, defaultOptions, decoder)
 
 onClick = (msg) ->
   decoder = (e) ->
@@ -33,4 +33,4 @@ module.exports =
   onClick: onClick
   onChange: onChange
   onInput: onInput
-  event: functools.curry2 event
+  event: curry event

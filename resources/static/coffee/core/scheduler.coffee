@@ -1,5 +1,5 @@
 { guid, Tuple0 } = require '../utils/common'
-{ curry2 } = require '../utils/functools'
+{ curry } = require './lambda'
 
 MAX_STEPS = 10000
 
@@ -23,6 +23,7 @@ andThen = (task, callback) ->
 
 onError = (task, callback) ->
   ctor: '_Task_onError'
+  task: task
   callback: callback
 
 receive = (callback) ->
@@ -145,12 +146,12 @@ module.exports =
   succeed: succeed
   fail: fail
   nativeBinding: nativeBinding
-  andThen: curry2(andThen)
-  onError: curry2(onError)
+  andThen: curry(andThen)
+  onError: curry(onError)
   receive: receive
   spawn: spawn
   kill: kill
   sleep: sleep
-  send: curry2(send)
+  send: curry(send)
   rawSpawn: rawSpawn
   rawSend: rawSend

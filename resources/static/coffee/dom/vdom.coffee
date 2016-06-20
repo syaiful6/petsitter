@@ -1,4 +1,5 @@
-functools = require '../utils/functools'
+{curry} = require '../core/lambda'
+either = require '../data/either'
 
 STYLE_KEY = 'STYLE'
 EVENT_KEY = 'EVENT'
@@ -10,7 +11,7 @@ text = (string) ->
   text: string
 
 node = (tag) ->
-  functools.curry2 (factList, kidList) ->
+  curry (factList, kidList) ->
     nodeHelp(tag, factList, kidList)
 
 nodeHelp = (tag, factList, kidList) ->
@@ -60,12 +61,12 @@ lazy = (fun, a) ->
 
 lazy2 = (fun, a, b) ->
   thunk(fun, [a,b], ->
-    functools.invoke2 fun, a, b
+    fun a, b
   )
 
 lazy3 = (fun, a, b, c) ->
   thunk(fun, [a, b, c], ->
-    functools.invoke3 fun, a, b, c
+    fun a, b, c
   )
 
 organizeFacts = (factList) ->
@@ -230,12 +231,11 @@ applyEvents = (domNode, eventNode, events) ->
 makeEventHandler = (eventNode, info) ->
   eventHandler = (event) ->
     info = eventHandler.info
-    value = info.decoder(event)
-    if value.ctor == 'Right'
+    info.decoder(event).map (val) ->
       options = info.options
       event.stopPropagation() if options.stopPropagation
       event.preventDefault() if options.preventDefault
-      message = value.value0
+      message = val
       currentEventNode = eventNode
       while currentEventNode
         tagger = currentEventNode.tagger
@@ -247,6 +247,7 @@ makeEventHandler = (eventNode, info) ->
           while i--
             message = tagger[i](message)
         currentEventNode = currentEventNode.parent
+      val
   eventHandler.info = info
   eventHandler
 
@@ -532,13 +533,13 @@ module.exports =
   node: node
   text: text
   custom: custom
-  map: functools.curry2 map
+  map: curry map
   programWithFlags: programWithFlags
-  event: functools.curry3 event
+  event: curry event
   style: style
-  property: functools.curry2 property
-  attribute: functools.curry2 attribute
-  attributeNS: functools.curry2 attributeNS
-  lazy: functools.curry2 lazy
-  lazy2: functools.curry3 lazy2
-  lazy3: functools.curry4 lazy3
+  property: curry property
+  attribute: curry attribute
+  attributeNS: curry attributeNS
+  lazy: curry lazy
+  lazy2: curry lazy2
+  lazy3: curry lazy3

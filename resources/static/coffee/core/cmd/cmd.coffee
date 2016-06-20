@@ -1,5 +1,5 @@
 platform = require '../platform'
-{fromArray, Nil} = require '../data/list'
+{fromArray, Nil} = require '../../data/list'
 
 # aliases
 map = platform.map

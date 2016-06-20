@@ -1,10 +1,10 @@
+Maybe = require './data/maybe'
+Either = require './data/either'
 scheduler = require './core/scheduler'
 platform = require './core/platform'
-{Right} = require './core/data/either'
-{Just, Nothing} = require './core/data/maybe'
-{map, fromArray} = require './core/data/list'
+{curry} = require './core/lambda'
+{map, fromArray} = require './data/list'
 {sequence, andThen} = require './core/task'
-{invoke3, invoke2} = require './utils/functools'
 {Tuple0} = require './utils/common'
 {onWindow} = require './dom/window'
 app = require './dom/app'
@@ -42,42 +42,41 @@ getLocation = ->
     password: location.password
   }
 
-andThenHelp = (task1) -> (task2) ->
+andThenHelp = curry (task1, task2) ->
   wrap = (_v) ->
     task2
-  andThen(task1)(wrap)
+  andThen(task1, wrap)
 
 spawnPopState = (router) ->
   toTask = (_e) ->
-    invoke2(platform.sendToSelf, router, getLocation())
-  scheduler.spawn invoke3(onWindow, 'popstate', Right, toTask)
+    platform.sendToSelf router, getLocation()
+  scheduler.spawn onWindow('popstate', Either.Right, toTask)
 
-notify = (router) -> (subs) -> (location) ->
+notify = curry (router, subs, location) ->
   callback = (val) ->
-    invoke2(platform.sendToApp, router, val.value0(location))
+    platform.sendToApp router, val.value0(location)
   if Array.isArray(subs)
     subs = fromArray(subs)
-  invoke2(andThenHelp, sequence(invoke2(map, callback, subs)), scheduler.succeed(Tuple0))
+  andThenHelp sequence(map(callback, subs)), scheduler.succeed(Tuple0)
 
-onSelfMsg = (router) -> (location) -> (state) ->
-  job = invoke3(notify, router, state.subs, location)
-  invoke2(andThenHelp, job, scheduler.succeed(state))
+onSelfMsg = curry (router, location, state) ->
+  andThenHelp notify(router, state.subs, location), scheduler.succeed(state)
 
-cmdHelp = (router) -> (subs) -> (cmd) ->
+cmdHelp = curry (router, subs, cmd) ->
   switch cmd.ctor
     when 'Jump' then go cmd.value0
-    when 'New' then invoke2 andThen, pushState(cmd.value0), invoke2(notify, router, subs)
-    else invoke2 andThen, replaceState(cmd.value0), invoke2(notify, router, subs)
+    when 'New' then andThen pushState(cmd.value0), notify(router, subs)
+    else andThen replaceState(cmd.value0), notify(router, subs)
 
-updateHelp = (func) -> (val) ->
+updateHelp = curry (func, val) ->
   ctor: '_Tuple2'
   value0: val.value0
-  value1: invoke2 platform.map, func, val.value1
+  value1: platform.map func, val.value1
 
 subscription = platform.leaf("Navigation")
 command = platform.leaf("Navigation")
 
-Location = (a) -> (b) -> (c) -> (d) -> (e) -> (f) -> (g) -> (h) -> (i) -> (j) -> (k) ->
+Location = curry (a, b, c, d, e, f, g, h, i, j, k) ->
   href: a
   host: b
   hostname: c
@@ -90,30 +89,31 @@ Location = (a) -> (b) -> (c) -> (d) -> (e) -> (f) -> (g) -> (h) -> (i) -> (j) ->
   username: j
   password: k
 
-State = (a) -> (b) ->
+State = curry (a, b) ->
   subs: a
   process: b
 
-init = scheduler.succeed invoke2(State, fromArray([]), Nothing)
+init = scheduler.succeed State(fromArray([]), Maybe.Nothing())
 
-onEffects = (router) -> (cmds) -> (subs) -> (val) ->
+onEffects = curry (router, cmds, subs, val) ->
   proc = val.process
   stepState = do ->
     step = ctor: '_Tuple2', value0: subs, value1: proc
     if step.value0.ctor == '[]'
-      if step.value1.ctor == 'Just'
-        return invoke2 andThenHelp, scheduler.kill(step.value1.value0), scheduler.succeed(State(subs)(Nothing))
+      if Maybe.isJust(step.value1)
+        nextState = State subs, Maybe.Nothing()
+        return andThenHelp scheduler.kill(step.value1.value0), scheduler.succeed(nextState)
       else
-        return scheduler.succeed State(subs)(proc)
+        return scheduler.succeed State(subs, proc)
     else
-      if step.value1.ctor == 'Nothing'
+      if Maybe.isNothing(step.value1)
         wrap = (pid) ->
-          scheduler.succeed State(subs)(Just(pid))
-        return invoke2 andThen, spawnPopState(router), wrap
+          scheduler.succeed State subs, Maybe.Just(pid)
+        return andThen spawnPopState(router), wrap
       else
-        return scheduler.succeed State(subs)(proc)
-  job = invoke2 map, invoke2(cmdHelp, router, subs), cmds
-  invoke2 andThenHelp, sequence(job), stepState
+        return scheduler.succeed State(subs, proc)
+  job = map cmdHelp(router, subs), cmds
+  andThenHelp sequence(job), stepState
 
 UserMsg = (a) ->
   ctor: 'UserMsg'
@@ -153,7 +153,7 @@ back = (n) ->
 forward = (n) ->
   command Jump(n)
 
-cmdMap = (__) -> (myCmd) ->
+cmdMap = curry (_, myCmd) ->
   switch myCmd.ctor
     when 'Jump' then Jump myCmd.value0
     when 'New' then NewUrl myCmd.value0
@@ -163,42 +163,42 @@ Monitor = (a) ->
   ctor: 'Monitor'
   value0: a
 
-programWithFlags = (parser) -> (stuff) ->
+programWithFlags = curry (parser, stuff) ->
   data = parser.value0
   location = getLocation()
   init = (flags) ->
-    invoke2 updateHelp, UserMsg, invoke2(stuff.init, flags, data(location))
+    updateHelp UserMsg, stuff.init(flags, data(location))
   view = (model) ->
-    invoke2 app.map, UserMsg, stuff.view(model)
+    app.map UserMsg, stuff.view(model)
   subs = (model) ->
     platform.batch fromArray([
       subscription(Monitor(Change)),
-      invoke2 platform.map, UserMsg, stuff.subscriptions(model)
+      platform.map UserMsg, stuff.subscriptions(model)
     ])
-  intent = (msg) -> (model) ->
-    invoke2 updateHelp, UserMsg, do ->
+  intent = curry (msg, model) ->
+    updateHelp UserMsg, do ->
       m = msg
       if m.ctor == 'Change'
-        invoke2 stuff.urlUpdate, data(m.value0), model
+        stuff.urlUpdate data(m.value0), model
       else
-        invoke2 stuff.update, m.value0, model
+        stuff.update m.value0, model
   app.programWithFlags
     init: init
     view: view
     update: intent
     subscriptions: subs
 
-program = (parser) -> (stuff) ->
-  invoke2 programWithFlags, parser, do (stuff) ->
+program = curry (parser, stuff) ->
+  programWithFlags parser, do (stuff) ->
     newField =
-      init: (__) -> stuff.init
+      init: curry (flags, either) -> stuff.init(either)
     newRecord = {}
     for own key of stuff
       value = if key of newField then newField[key] else stuff[key]
       newRecord[key] = value
     newRecord
 
-subMap = (func) -> (val) ->
+subMap = curry (func, val) ->
   Monitor (el) -> func(val.value0(el))
 
 unless 'Navigation' of platform.effectManagers
