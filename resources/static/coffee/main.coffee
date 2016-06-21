@@ -1,4 +1,3 @@
-{beginnerProgram} = require './dom/app'
 {none} = require './core/cmd/sub'
 {startApp} = require './core/platform'
 {onClick} = require './dom/events'

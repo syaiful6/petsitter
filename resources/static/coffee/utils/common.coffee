@@ -31,3 +31,4 @@ module.exports =
   Tuple2: Tuple2
   update: update
   chr: chr
+  getInstance: getInstance
