@@ -2,6 +2,7 @@
 {Tuple0, Tuple2} = require '../utils/common'
 {programWithFlags} = require '../dom/vdom'
 {curry} = require './lambda'
+Either = require '../data/either'
 
 # hmm
 { send,
@@ -15,10 +16,10 @@
 
 schedulerSend = send
 
-startApp = (main) ->
+bootstrap = (name, main) ->
   app = {}
-  app['main'] = {}
-  addPublicModule(app['main'], 'main', {main: main})
+  app[name] = {}
+  addPublicModule(app[name], name, {main: main})
   app
 
 addPublicModule = (object, name, main) ->
@@ -312,7 +313,7 @@ setupIncomingPort = (name, callback) ->
 
   send = (value) ->
     result = converter(value)
-    if result.ctor == 'Left'
+    if Either.isLeft result
       throw new Error('Unexpected value')
     value = result.value0
     temp = subs
@@ -333,4 +334,4 @@ module.exports =
   leaf: leaf
   batch: batch
   map: curry(map)
-  startApp: startApp
+  bootstrap: curry(bootstrap)

@@ -19,7 +19,8 @@ tail = (a) ->
 #
 # concatArgs :: [a] -> ArrayLike a -> [a]
 concatArgs = (a, b) ->
-  a.concat toArray(b)
+  arg = if b.length == 0 then [undefined] else b
+  a.concat toArray(arg)
 
 # used internally to create function based argument and total artity
 #
