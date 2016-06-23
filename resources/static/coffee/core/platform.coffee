@@ -54,7 +54,7 @@ dummyRenderer = ->
 
 mainToProgram = (moduleName, wrappedMain) ->
   main = wrappedMain.main
-  if typeof main == 'undefined'
+  if typeof main.init == 'undefined'
     emptyBag = batch(Nil)
     noChange = Tuple2 Tuple0, emptyBag
     return programWithFlags(

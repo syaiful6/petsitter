@@ -212,6 +212,7 @@ applyFacts = (domNode, eventNode, facts) ->
 applyStyles = (domNode, styles) ->
   domNodeStyle = domNode.style
   domNodeStyle[key] = styles[key] for key of styles
+  return
 
 applyEvents = (domNode, eventNode, events) ->
   allHandlers = domNode.__evhandlers__ or {}
@@ -257,6 +258,7 @@ applyAttrs = (domNode, attrs) ->
       domNode.removeAttribute(key)
     else
       domNode.setAttribute(key, value)
+  return
 
 applyAttrsNS = (domNode, nsAttrs) ->
   for key of nsAttrs
@@ -267,6 +269,7 @@ applyAttrsNS = (domNode, nsAttrs) ->
       domNode.removeAttributeNS(namespace, key)
     else
       domNode.setAttributeNS(namespace, key, value)
+  return
 
 diff = (a, b) ->
   patches = []
