@@ -2,7 +2,8 @@
 {bootstrap} = require './core/platform'
 {onClick} = require './dom/events'
 {div, button, text, span} = require './dom/helper'
-{curry} = require './core/lambda'
+{taggedSum} = require './core/tagged'
+{curry, constant} = require './core/lambda'
 tuple = require './data/tuple'
 Either = require './data/either'
 navigation = require './navigation'
@@ -39,27 +40,25 @@ urlParser = navigation.makeParser (el) ->
 
 model = 0
 
-Increment = ->
-  ctor: 'Increment'
-
-Decrement = ->
-  ctor: 'Decrement'
+Msg = taggedSum {
+  Increment: [],
+  Decrement: []
+}
 
 # update :: Msg -> Model -> (Model, Cmd)
 update = curry (msg, model) ->
-  ctor = msg.ctor
-  if ctor == 'Increment'
+  if msg == Msg.Increment
     newModel = model + 1
-  else if ctor == 'Decrement'
+  else
     newModel = model - 1
   tuple.Tuple newModel, navigation.newUrl toUrl(newModel)
 
 view = (model) ->
   div(
     [],
-    [ button([onClick(Decrement)], [text "-" ])
+    [ button([onClick(constant(Msg.Decrement))], [text "-" ])
       , span([], [text model.toString()])
-      , button([onClick(Increment)], [text "+"])
+      , button([onClick(constant(Msg.Increment))], [text "+"])
     ]
   )
 

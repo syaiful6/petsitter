@@ -120,8 +120,11 @@ flip = (f, a, b) ->
   f(b)(a)
 
 # apply a function to a single argument
-# apply :: (f -> a) -> a -> f(a)
 apply = (f, a) ->
+  f(a)
+
+# T combinator take an argument and function that accept the argument
+thrush = (a, f) ->
   f(a)
 
 # compose two functions
@@ -142,11 +145,12 @@ upon = (f, g, a, b) ->
 
 module.exports =
   curry: curry,
-  identity: curry(identity),
-  constant: curry(constant),
-  flip: curry(flip),
-  apply: curry(apply),
-  compose: curry(compose),
-  spread: curry(spread),
-  uncurry: uncurry,
+  identity: curry(identity)
+  constant: curry(constant)
+  flip: curry(flip)
+  apply: curry(apply)
+  thrush: curry(thrush)
+  compose: curry(compose)
+  spread: curry(spread)
+  uncurry: uncurry
   upon: curry(upon)

@@ -81,6 +81,4 @@ State.StateT = (M) ->
 
   StateT
 
-module.exports =
-  State: State
-  StateT: StateT
+module.exports = State
