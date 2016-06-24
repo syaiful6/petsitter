@@ -19,7 +19,7 @@ command = platform.leaf("Navigation")
 
 # type MyMsg msg = Change Location | UserMsg msg
 MyMsg = taggedSum {
-  Change: ['value0'],
+  Change: ['value0']
   UserMsg: ['value0']
 }
 
@@ -63,8 +63,8 @@ updateHelp = curry (func, val) ->
 
 #
 MyCmd = taggedSum {
-  Jump: ['value0'],
-  NewUrl: ['value0'],
+  Jump: ['value0']
+  NewUrl: ['value0']
   Modify: ['value0']
 }
 

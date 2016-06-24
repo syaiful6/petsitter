@@ -13,11 +13,11 @@ toString = Object::toString
 subscriptions = (model) ->
   none
 
-# isNumber :: any -> Boolean
+# isNumber :: * -> Boolean
 isNumber = (value) ->
   typeof value == 'number' or value and typeof value == 'object' and toString.call(value) == '[object Number]' or false
 
-# isFinite :: any -> Boolean
+# isFinite :: * -> Boolean
 isFinite = (value) ->
   window.isFinite(value) and not window.isNaN(parseFloat(value))
 
@@ -38,10 +38,12 @@ toUrl = (count) ->
 urlParser = navigation.makeParser (el) ->
   fromUrl el.hash
 
+# model :: Int
 model = 0
 
+# type Msg = Increment | Decrement
 Msg = taggedSum {
-  Increment: [],
+  Increment: []
   Decrement: []
 }
 
@@ -55,10 +57,10 @@ update = curry (msg, model) ->
 
 view = (model) ->
   div(
-    [],
+    []
     [ button([onClick(constant(Msg.Decrement))], [text "-" ])
-      , span([], [text model.toString()])
-      , button([onClick(constant(Msg.Increment))], [text "+"])
+      span([], [text model.toString()])
+      button([onClick(constant(Msg.Increment))], [text "+"])
     ]
   )
 
