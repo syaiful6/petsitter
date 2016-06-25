@@ -393,9 +393,10 @@ diffFacts = (a, b, category) ->
     res = res or {}
     res[aKey] = bValue
 
-  for bKey of b when not bKey of a
-    res = diff or {}
-    res[bKey] = b[bKey]
+  for bKey of b
+    unless bKey of a
+      res = diff or {}
+      res[bKey] = b[bKey]
 
   res
 
@@ -502,10 +503,12 @@ applyPatch = (domNode, patch) ->
       return domNode
     when 'p-insert'
       newNodes = patch.data
+      fragment = document.createDocumentFragment()
       j = 0
       while j < newNodes.length
-        domNode.appendChild render(newNodes[j], patch.eventNode)
+        fragment.appendChild render(newNodes[j], patch.eventNode)
         j++
+      domNode.appendChild fragment
       return domNode
     when 'p-custom'
       impl = patch.data

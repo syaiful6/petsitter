@@ -9,6 +9,7 @@ platform = require './core/platform'
 {sequence, andThen} = require './core/task'
 {Tuple0} = require './utils/common'
 {onWindow} = require './dom/window'
+{extend} = require './utils/object'
 app = require './dom/app'
 
 # effects command
@@ -48,14 +49,9 @@ programWithFlags = curry (parser, stuff) ->
     subscriptions: subs
 
 program = curry (parser, stuff) ->
-  programWithFlags parser, do (stuff) ->
-    newField =
-      init: curry (flags, either) -> stuff.init(either)
-    newRecord = {}
-    for own key of stuff
-      value = if key of newField then newField[key] else stuff[key]
-      newRecord[key] = value
-    newRecord
+  newField =
+    init: curry (flags, either) -> stuff.init(either)
+  programWithFlags parser, extend(stuff, newField)
 
 updateHelp = curry (func, val) ->
   Tuple val.value0, platform.map(func, val.value1)

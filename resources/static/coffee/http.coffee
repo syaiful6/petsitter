@@ -53,7 +53,7 @@ multipart = (dataList) ->
   formData = new FormData()
   until dataList.ctor == '[]'
     data = dataList.value0
-    if data instanceof StringData
+    if data instanceof Data.StringData
       formData.append data.value0, data.value1
     else
       fileName = if Maybe.isNothing(data.value1) then undefined else data.value1.value0
@@ -78,8 +78,8 @@ Settings = curry (a, b, c, d, e) ->
 
 defaultSettings =
   timeout: 0
-  onStart: Nothing
-  onProgress: Nothing
+  onStart: Maybe.Nothing()
+  onProgress: Maybe.Nothing()
   desiredResponseType: Maybe.Nothing()
   withCredentials: false
 
@@ -174,10 +174,10 @@ parseHeaders = (rawHeader) ->
       value = headerPair.substring(index + 2)
       if key of headers
         oldVal = headers[key]
-        if oldValue.ctor
-          headers[key] = Just(value + ', ' + oldValue.value0)
+        if Maybe.isJust(oldVal)
+          headers[key] = Maybe.Just(value + ', ' + oldValue.value0)
           continue
-      headers[key] = Just(value)
+      headers[key] = Maybe.Just(value)
   headers
 
 handleResponse = curry (handle, response) ->
