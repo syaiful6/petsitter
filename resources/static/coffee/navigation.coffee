@@ -24,6 +24,9 @@ MyMsg = taggedSum {
   UserMsg: ['value0']
 }
 
+# a wrapper around "default" program structure. So we can update the browser history
+# with effects manager.
+# proramWithFlags :: Parser data -> program -> program
 programWithFlags = curry (parser, stuff) ->
   data = parser.value0
   location = getLocation()
@@ -48,6 +51,7 @@ programWithFlags = curry (parser, stuff) ->
     update: intent
     subscriptions: subs
 
+# this functions for program that not accept flags on init function.
 program = curry (parser, stuff) ->
   newField =
     init: curry (flags, either) -> stuff.init(either)

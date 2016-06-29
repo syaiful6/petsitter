@@ -1,4 +1,8 @@
+{curry} = require '../core/lambda'
+
 counter = 0
+
+toString = Object::toString
 
 guid = ->
   counter++
@@ -10,6 +14,13 @@ Tuple2 = (x, y) ->
   ctor: '_Tuple2'
   value0: x
   value1: y
+
+# type :: * -> String
+type = (x) ->
+  toString.call(x).slice 8, -1
+
+isType = (tp, v) ->
+  type(v) == tp
 
 chr = (x) ->
   new String(x)
@@ -28,7 +39,9 @@ getInstance = (self, ctor) ->
 module.exports =
   guid: guid
   Tuple0: Tuple0
-  Tuple2: Tuple2
-  update: update
+  Tuple2: curry Tuple2
+  update: curry update
   chr: chr
-  getInstance: getInstance
+  getInstance: curry getInstance
+  isType: curry isType
+  type: type
