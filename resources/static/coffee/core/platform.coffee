@@ -42,7 +42,7 @@ mainIsUndefined = (name) -> (domNode) ->
 makeEmbed = (moduleName, main) -> (rootDomNode, flags, withRenderer) ->
   try
     program = mainToProgram(moduleName, main)
-    if not withRenderer
+    unless withRenderer
       program.renderer = dummyRenderer
     makeEmbedHelp(moduleName, program, rootDomNode, flags)
   catch e

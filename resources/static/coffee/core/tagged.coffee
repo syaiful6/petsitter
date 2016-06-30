@@ -37,9 +37,7 @@ taggedSum = (ctor) ->
       unless dispatches[key]
         throw new TypeError "Constructors given to cata didn't include: #{key}"
 
-      args = (this[field] for field in fields)
-
-      dispatches[key].apply this, args
+      dispatches[key].apply this, (this[field] for field in fields)
 
   makeProto = (key) ->
     proto = Object.create definitions.prototype
