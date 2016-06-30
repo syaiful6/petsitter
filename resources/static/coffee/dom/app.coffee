@@ -1,17 +1,22 @@
-{Tuple2, update} = require '../utils/common'
+{extend} = require '../utils/object'
 {none} = require '../core/cmd/cmd'
+{Tuple} = require '../data/tuple'
 {programWithFlags, map} = require './vdom'
-{curry} = require '../core/lambda'
+{curry, constant} = require '../core/lambda'
 
 beginnerProgram = (details) ->
   programWithFlags
-    init: (_x) -> Tuple2(details.model, none)
-    update: curry (msg, model) -> Tuple2 details.update(msg, model), none
+    init: constant Tuple(details.model, none)
+    update: curry (msg, model) ->
+      Tuple details.update(msg, model), none
     view: details.view
-    subscriptions: (_x) -> none
+    subscriptions: constant none
 
 program = (app) ->
-  programWithFlags(update(app, {init: (_x) -> app.init}))
+  prog = extend app, {
+    init: constant(app.init)
+  }
+  programWithFlags prog
 
 programWithFlags = programWithFlags
 
