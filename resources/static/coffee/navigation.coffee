@@ -5,7 +5,7 @@ Either = require './data/either'
 scheduler = require './core/scheduler'
 platform = require './core/platform'
 {tagged, taggedSum} = require './core/tagged'
-{curry} = require './core/lambda'
+{curry, constant} = require './core/lambda'
 {sequence, andThen} = require './core/task'
 {Tuple0} = require './utils/common'
 {onWindow} = require './dom/window'
@@ -30,36 +30,32 @@ MyMsg = taggedSum {
 programWithFlags = curry (parser, stuff) ->
   data = parser.value0
   location = getLocation()
-  init = (flags) ->
-    updateHelp MyMsg.UserMsg, stuff.init(flags, data(location))
-  view = (model) ->
-    app.map MyMsg.UserMsg, stuff.view(model)
-  subs = (model) ->
-    platform.batch fromArray([
-      subscription MySub.Monitor(MyMsg.Change),
-      platform.map MyMsg.UserMsg, stuff.subscriptions(model)
-    ])
-  intent = curry (msg, model) ->
-    updateHelp MyMsg.UserMsg, do ->
-      if msg instanceof MyMsg.Change
-        stuff.urlUpdate data(msg.value0), model
-      else
-        stuff.update msg.value0, model
   app.programWithFlags
-    init: init
-    view: view
-    update: intent
-    subscriptions: subs
+    init: (flags) ->
+      updateHelp MyMsg.UserMsg, stuff.init(flags, data(location))
+    view: (model) ->
+      app.map MyMsg.UserMsg, stuff.view(model)
+    update: curry (msg, model) ->
+      updateHelp MyMsg.UserMsg, do ->
+        if msg instanceof MyMsg.Change
+          stuff.urlUpdate data(msg.value0), model
+        else
+          stuff.update msg.value0, model
+    subscriptions: (model) ->
+      platform.batch fromArray([
+        subscription MySub.Monitor(MyMsg.Change),
+        platform.map MyMsg.UserMsg, stuff.subscriptions(model)
+      ])
 
 # this functions for program that not accept flags on init function.
 program = curry (parser, stuff) ->
   newField =
-    init: curry (flags, either) -> stuff.init(either)
+    init: curry (flags, either) ->
+      stuff.init(either)
   programWithFlags parser, extend(stuff, newField)
 
 updateHelp = curry (func, val) ->
   Tuple val.value0, platform.map(func, val.value1)
-
 
 #
 MyCmd = taggedSum {
@@ -87,14 +83,13 @@ modifyUrl = (url) ->
   command MyCmd.Modify(url)
 
 cmdMap = curry (_, myCmd) ->
-  myCmd.cata {
+  myCmd.cata
     Jump: (v) ->
       MyCmd.Jump v
     NewUrl: (v) ->
       MyCmd.NewUrl v
     Modify: (v) ->
       MyCmd.Modify v
-  }
 
 Parser = tagged('value0')
 makeParser = Parser
@@ -117,13 +112,12 @@ MySub = taggedSum {
 }
 
 subMap = curry (func, val) ->
-  MySub.Monitor (el) -> func(val.value0(el))
+  MySub.Monitor (el) ->
+    func val.value0(el)
 
 # utility function to run tasks
 andThenHelp = curry (task1, task2) ->
-  wrap = (_v) ->
-    task2
-  andThen(task1, wrap)
+  andThen task1, constant(task2)
 
 State = curry (a, b) ->
   subs: a

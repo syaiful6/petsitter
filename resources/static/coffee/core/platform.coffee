@@ -33,6 +33,7 @@ addPublicModule = (object, name, main) ->
 
   object['fullscreen'] = (flags) ->
     init(document.body, flags, true)
+  return
 
 mainIsUndefined = (name) -> (domNode) ->
   message = "Cant initialize module #{name} because it has no `main` value!\nWhat should I show on screen?"
